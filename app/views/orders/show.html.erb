@@ -1,0 +1,49 @@
+<div class="container text-center py-5">
+  <div class="card shadow-lg border-0 d-inline-block p-5" style="max-width: 800px; width: 100%;">
+    <div class="mb-4 text-success">
+      <i class="bi bi-check-circle-fill display-1"></i>
+    </div>
+    
+    <h1 class="display-4 fw-bold mb-3">Thank You!</h1>
+    <p class="lead text-muted mb-4">Your order has been placed successfully.</p>
+    
+    <div class="card bg-light border-0 mb-4 text-start">
+      <div class="card-body">
+        <h5 class="card-title fw-bold">Order Details</h5>
+        <p class="mb-1"><strong>Order ID:</strong> #<%= @order.id %></p>
+        <p class="mb-1"><strong>Name:</strong> <%= @order.name %></p>
+        <p class="mb-1"><strong>Email:</strong> <%= @order.email %></p>
+        <p class="mb-0"><strong>Shipping Address:</strong> <%= @order.address %></p>
+      </div>
+    </div>
+
+    <div class="table-responsive mb-4 text-start">
+      <table class="table">
+        <thead class="table-light">
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th class="text-end">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @order.order_items.each do |item| %>
+            <tr>
+              <td><%= item.product.name %></td>
+              <td><%= item.quantity %></td>
+              <td class="text-end"><%= item.formatted_subtotal %></td>
+            </tr>
+          <% end %>
+          <tr class="fw-bold">
+            <td colspan="2" class="text-end">Total Paid:</td>
+            <td class="text-end"><%= @order.formatted_total %></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <%= link_to "Continue Shopping", products_path, class: "btn btn-primary btn-lg px-4 gap-3" %>
+    </div>
+  </div>
+</div>
