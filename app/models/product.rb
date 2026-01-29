@@ -1,4 +1,8 @@
 class Product < ApplicationRecord
+  belongs_to :category, optional: true
+  has_many :cart_items, dependent: :destroy
+  has_one_attached :image
+
   # Validations
   validates :name, presence: true, length: { minimum: 3, maximum: 100 }
   validates :description, presence: true, length: { minimum: 10 }

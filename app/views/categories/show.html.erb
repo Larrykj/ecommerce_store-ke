@@ -1,18 +1,24 @@
 <div class="container">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="display-4 fw-bold">Our Products</h1>
     <div>
-      <span class="badge bg-primary fs-5 rounded-pill me-2"><%= @products.count %> Items</span>
-      <%= link_to 'Add New Product', new_product_path, class: 'btn btn-success' %>
+      <h1 class="display-4 fw-bold"><%= @category.name %></h1>
+      <p class="lead text-muted"><%= @category.description %></p>
+    </div>
+    <div class="btn-group">
+      <%= link_to 'Edit Category', edit_category_path(@category), class: 'btn btn-outline-warning' %>
+      <%= link_to 'Back to Categories', categories_path, class: 'btn btn-outline-secondary' %>
     </div>
   </div>
+
+  <hr class="my-4">
+
+  <h2 class="mb-4">Products in this Category</h2>
 
   <% if @products.any? %>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
       <% @products.each do |product| %>
         <div class="col">
           <div class="card h-100 shadow-sm border-0">
-            <!-- Product Image or Placeholder -->
             <% if product.image.attached? %>
               <%= image_tag product.image, class: 'card-img-top', style: 'height: 200px; object-fit: cover;', alt: product.name %>
             <% else %>
@@ -34,14 +40,7 @@
 
             <div class="card-footer bg-white border-top-0 pb-3">
               <div class="d-grid gap-2">
-                <% if product.in_stock? %>
-                  <%= button_to 'Add to Cart', cart_items_path(product_id: product.id), method: :post, class: 'btn btn-success' %>
-                <% end %>
-                <div class="btn-group w-100" role="group">
-                  <%= link_to 'View', product_path(product), class: 'btn btn-outline-primary' %>
-                  <%= link_to 'Edit', edit_product_path(product), class: 'btn btn-outline-warning' %>
-                  <%= button_to 'Delete', product_path(product), method: :delete, data: { turbo_confirm: 'Are you sure?' }, class: 'btn btn-outline-danger' %>
-                </div>
+                <%= link_to 'View Product', product_path(product), class: 'btn btn-outline-primary' %>
               </div>
             </div>
           </div>
@@ -50,9 +49,8 @@
     </div>
   <% else %>
     <div class="text-center py-5">
-      <i class="bi bi-inbox display-1 text-muted"></i>
-      <p class="lead mt-3">No products available yet.</p>
-      <%= link_to "Add Your First Product", new_product_path, class: "btn btn-primary btn-lg mt-2" %>
+      <i class="bi bi-box-seam display-1 text-muted"></i>
+      <p class="lead mt-3">No products in this category yet.</p>
     </div>
   <% end %>
 </div>
