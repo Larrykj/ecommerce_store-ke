@@ -4,6 +4,7 @@ class ProductsController < ApplicationController
   # GET /products
   def index
     @products = Product.all
+     @categories = Category.all  # <-- Make sure this line exists
   end
 
   # GET /products/:id

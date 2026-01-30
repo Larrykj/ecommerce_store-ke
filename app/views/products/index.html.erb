@@ -7,6 +7,75 @@
     </div>
   </div>
 
+  <!-- Search and Filter Section -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <%= form_with url: products_path, method: :get, local: true, class: "row g-3" do |f| %>
+        <!-- Search Input -->
+        <div class="col-md-4">
+          <%= f.text_field :search, 
+              value: params[:search], 
+              class: "form-control", 
+              placeholder: "Search products..." %>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="col-md-3">
+  <%= f.select :category_id, 
+      options_from_collection_for_select(@categories || [], :id, :name, params[:category_id]), 
+      { prompt: "All Categories" }, 
+      class: "form-select" %>
+</div>
+
+        <!-- Sort Options -->
+        <div class="col-md-3">
+          <%= f.select :sort, 
+              options_for_select([
+                ['Newest First', 'newest'],
+                ['Price: Low to High', 'price_asc'],
+                ['Price: High to Low', 'price_desc'],
+                ['Name: A-Z', 'name_asc'],
+                ['Name: Z-A', 'name_desc']
+              ], params[:sort]), 
+              { prompt: "Sort by" }, 
+              class: "form-select" %>
+        </div>
+
+        <!-- Search Button -->
+        <div class="col-md-2">
+          <div class="d-grid gap-2">
+            <%= f.submit "Search", class: "btn btn-primary w-100" %>
+            <% if params[:search].present? || params[:category_id].present? || params[:sort].present? %>
+              <%= link_to "Clear", products_path, class: "btn btn-outline-secondary w-100" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Search Results Message -->
+  <% if params[:search].present? || params[:category_id].present? %>
+    <div class="alert alert-info">
+      <strong>Search Results:</strong> 
+      Found <%= @products.count %> product(s)
+      <% if params[:search].present? %>
+        matching "<%= params[:search] %>"
+      <% end %>
+      <% if params[:category_id].present? %>
+        in category "<%= Category.find(params[:category_id]).name %>"
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-4 fw-bold">Our Products</h1>
+    <div>
+      <span class="badge bg-primary fs-5 rounded-pill me-2"><%= @products.count %> Items</span>
+      <%= link_to 'Add New Product', new_product_path, class: 'btn btn-success' %>
+    </div>
+  </div>
+
   <% if @products.any? %>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
       <% @products.each do |product| %>
@@ -23,6 +92,12 @@
 
             <div class="card-body d-flex flex-column">
               <h5 class="card-title fw-bold"><%= product.name %></h5>
+              
+              <!-- Category Badge -->
+              <% if product.category %>
+                <span class="badge bg-info mb-2"><%= product.category.name %></span>
+              <% end %>
+
               <p class="card-text text-muted flex-grow-1"><%= truncate(product.description, length: 100) %></p>
               <div class="d-flex justify-content-between align-items-center mt-3">
                 <span class="h4 mb-0 text-primary"><%= product.formatted_price %></span>
