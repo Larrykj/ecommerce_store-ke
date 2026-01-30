@@ -1,38 +1,61 @@
 require "test_helper"
 
 class CategoriesControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
+  setup do
+    @category = categories(:one)
+    @user = users(:one)
+  end
+
   test "should get index" do
-    get categories_index_url
+    get categories_url
     assert_response :success
   end
 
   test "should get show" do
-    get categories_show_url
+    get category_url(@category)
     assert_response :success
   end
 
-  test "should get new" do
-    get categories_new_url
+  test "should get new when signed in" do
+    sign_in @user
+    get new_category_url
     assert_response :success
   end
 
-  test "should get create" do
-    get categories_create_url
+  test "should redirect new when not signed in" do
+    get new_category_url
+    assert_redirected_to new_user_session_url
+  end
+
+  test "should create category when signed in" do
+    sign_in @user
+    assert_difference("Category.count") do
+      post categories_url, params: { category: { name: "New Category", description: "A new test category" } }
+    end
+
+    assert_redirected_to categories_url
+  end
+
+  test "should get edit when signed in" do
+    sign_in @user
+    get edit_category_url(@category)
     assert_response :success
   end
 
-  test "should get edit" do
-    get categories_edit_url
-    assert_response :success
+  test "should update category when signed in" do
+    sign_in @user
+    patch category_url(@category), params: { category: { name: "Updated Name", description: "Updated description" } }
+    assert_redirected_to category_url(@category)
   end
 
-  test "should get update" do
-    get categories_update_url
-    assert_response :success
-  end
+  test "should destroy category when signed in" do
+    sign_in @user
+    assert_difference("Category.count", -1) do
+      delete category_url(@category)
+    end
 
-  test "should get destroy" do
-    get categories_destroy_url
-    assert_response :success
+    assert_redirected_to categories_url
   end
 end
