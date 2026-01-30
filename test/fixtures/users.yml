@@ -1,4 +1,13 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# User Fixtures for Testing
+#
+# These fixtures provide test user accounts for integration tests.
+# Used with Devise authentication in controller tests.
+#
+# Note: Passwords are encrypted using Devise::Encryptor
+# Plain text password for both users: "password123"
+#
+# Author: Larrykj
+# Last Updated: 2026-01-30
 
 one:
   email: "user1@example.com"
