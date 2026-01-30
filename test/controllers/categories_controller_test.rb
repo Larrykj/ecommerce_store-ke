@@ -1,7 +1,7 @@
 require "test_helper"
 
 # CategoriesControllerTest - Integration tests for the Categories controller
-# 
+#
 # This test class verifies the CRUD operations for categories, including:
 # - Public access to index and show actions
 # - Protected access to create, edit, update, and destroy (requires authentication)
