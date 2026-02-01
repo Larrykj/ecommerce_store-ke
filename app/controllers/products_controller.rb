@@ -3,8 +3,20 @@ class ProductsController < ApplicationController
 
   # GET /products
   def index
-    @products = Product.all
-     @categories = Category.all  # <-- Make sure this line exists
+    # Get all categories for the filter dropdown
+    @categories = Category.all
+
+    # Get price range for the dynamic price filter UI
+    @price_stats = Product.price_stats
+
+    # Apply advanced search and filtering
+    @products = Product.advanced_search(search_params)
+
+    # Calculate active filters count for UI feedback
+    @active_filters_count = count_active_filters
+
+    # Store the current search parameters for the view
+    @search_params = search_params
   end
 
   # GET /products/:id
@@ -54,5 +66,21 @@ class ProductsController < ApplicationController
 
   def product_params
       params.require(:product).permit(:name, :description, :price, :quantity, :image, :category_id)
+  end
+
+  # Permitted parameters for search and filtering
+  def search_params
+    params.permit(:search, :category_id, :min_price, :max_price, :stock_status, :sort).to_h.symbolize_keys
+  end
+
+  # Count how many filters are currently active
+  def count_active_filters
+    count = 0
+    count += 1 if params[:search].present?
+    count += 1 if params[:category_id].present?
+    count += 1 if params[:min_price].present? || params[:max_price].present?
+    count += 1 if params[:stock_status].present?
+    count += 1 if params[:sort].present?
+    count
   end
 end

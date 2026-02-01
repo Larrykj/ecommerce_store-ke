@@ -7,7 +7,28 @@ class CategoriesController < ApplicationController
   end
 
   def show
-    @products = @category.products
+    # Start with products in this category
+    base_products = @category.products
+    
+    # Apply search and filtering within this category
+    if params[:search].present? || params[:min_price].present? || params[:max_price].present? || params[:stock_status].present? || params[:sort].present?
+      @products = base_products.search_by_text(params[:search])
+                               .by_min_price(params[:min_price])
+                               .by_max_price(params[:max_price])
+                               .by_stock_status(params[:stock_status])
+                               .sorted_by(params[:sort] || 'newest')
+    else
+      @products = base_products.sorted_by('newest')
+    end
+    
+    # Get price stats for this category
+    @price_stats = {
+      min: base_products.minimum(:price)&.to_f || 0,
+      max: base_products.maximum(:price)&.to_f || 0
+    }
+    
+    # Count active filters
+    @active_filters_count = count_category_filters
   end
 
   def new
@@ -48,5 +69,14 @@ class CategoriesController < ApplicationController
 
   def category_params
     params.require(:category).permit(:name, :description)
+  end
+
+  def count_category_filters
+    count = 0
+    count += 1 if params[:search].present?
+    count += 1 if params[:min_price].present? || params[:max_price].present?
+    count += 1 if params[:stock_status].present?
+    count += 1 if params[:sort].present?
+    count
   end
 end
