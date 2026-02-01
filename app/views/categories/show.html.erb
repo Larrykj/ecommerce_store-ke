@@ -1,6 +1,10 @@
 <div class="category-show-page">
   <!-- Category Header -->
   <div class="category-hero">
+    <% if @category.image.attached? %>
+      <div class="hero-bg-image" style="background-image: url('<%= url_for(@category.image) %>')"></div>
+    <% end %>
+    <div class="hero-overlay"></div>
     <div class="hero-content">
       <span class="category-badge"><i class="bi bi-grid-3x3-gap me-2"></i>Category</span>
       <h1 class="category-title"><%= @category.name %></h1>
@@ -11,6 +15,9 @@
         <span class="stat-pill"><i class="bi bi-box me-1"></i><%= @category.products.count %> products</span>
         <% if @category.products.any? %>
           <span class="stat-pill"><i class="bi bi-currency-dollar me-1"></i>From KSh <%= number_with_delimiter(@price_stats[:min].to_i) %></span>
+        <% end %>
+        <% if @category.total_reviews_count > 0 %>
+          <span class="stat-pill rating"><i class="bi bi-star-fill me-1"></i><%= @category.average_rating %> (<%= @category.total_reviews_count %> reviews)</span>
         <% end %>
       </div>
     </div>
@@ -37,7 +44,7 @@
               <% end %>
             </div>
 
-            <%= form_with url: category_path(@category), method: :get, local: true, id: "category-filter-form" do |f| %>
+            <%= form_with url: category_path(@category), method: :get, local: true, id: "category-filter-form", data: { turbo_frame: "_top" } do |f| %>
               <!-- Search -->
               <div class="filter-section">
                 <label class="filter-label"><i class="bi bi-search me-2"></i>Search</label>
@@ -126,6 +133,19 @@
                   </div>
                   <div class="product-info">
                     <h3 class="product-name"><%= link_to product.name, product_path(product) %></h3>
+                    
+                    <!-- Rating Display -->
+                    <% if product.reviews_count > 0 %>
+                      <div class="product-rating">
+                        <div class="stars">
+                          <% 5.times do |i| %>
+                            <i class="bi bi-star<%= i < product.average_rating.round ? '-fill' : '' %>"></i>
+                          <% end %>
+                        </div>
+                        <span class="rating-text"><%= product.average_rating %> (<%= product.reviews_count %>)</span>
+                      </div>
+                    <% end %>
+                    
                     <p class="product-desc"><%= truncate(product.description, length: 70) %></p>
                     <div class="product-footer">
                       <div class="product-price">
@@ -169,15 +189,39 @@
 :root { --primary: #667eea; --secondary: #764ba2; --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
 .category-show-page { background: #f8fafc; min-height: 100vh; }
 
-/* Hero */
-.category-hero { background: var(--gradient); padding: 50px 30px; margin: -24px -12px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-.hero-content { max-width: 600px; }
+/* Hero with Background Image */
+.category-hero {
+  position: relative;
+  padding: 60px 30px;
+  margin: -24px -12px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  overflow: hidden;
+}
+.hero-bg-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(3px);
+  transform: scale(1.1);
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(102,126,234,0.9) 0%, rgba(118,75,162,0.9) 100%);
+}
+.hero-content { position: relative; z-index: 1; max-width: 600px; }
 .category-badge { display: inline-flex; align-items: center; padding: 6px 14px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-size: 0.85rem; margin-bottom: 12px; }
 .category-title { color: white; font-size: 2.5rem; font-weight: 800; margin: 0 0 10px; }
 .category-desc { color: rgba(255,255,255,0.9); font-size: 1.1rem; margin: 0 0 16px; }
 .category-stats { display: flex; gap: 12px; flex-wrap: wrap; }
 .stat-pill { display: inline-flex; align-items: center; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-size: 0.85rem; }
-.hero-actions { display: flex; gap: 12px; }
+.stat-pill.rating i { color: #fbbf24; }
+.hero-actions { position: relative; z-index: 1; display: flex; gap: 12px; }
 .hero-btn { display: inline-flex; align-items: center; padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
 .hero-btn.secondary { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); }
 .hero-btn.secondary:hover { background: rgba(255,255,255,0.3); color: white; }
@@ -236,6 +280,13 @@
 .product-name { font-size: 1rem; font-weight: 700; margin: 0 0 8px; }
 .product-name a { color: #1e293b; text-decoration: none; }
 .product-name a:hover { color: var(--primary); }
+
+/* Product Rating */
+.product-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.stars { display: flex; gap: 2px; }
+.stars i { font-size: 0.85rem; color: #fbbf24; }
+.rating-text { font-size: 0.8rem; color: #64748b; }
+
 .product-desc { color: #64748b; font-size: 0.85rem; margin: 0 0 14px; line-height: 1.5; }
 .product-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid #f1f5f9; }
 .product-price { display: flex; align-items: baseline; gap: 4px; }

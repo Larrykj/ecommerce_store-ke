@@ -3,11 +3,22 @@ class CategoriesController < ApplicationController
   before_action :set_category, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @categories = Category.all
+    @categories = Category.advanced_search(search_params)
+    @active_filters_count = count_active_filters
+    @search_params = search_params
   end
 
   def show
+    # Get products with filtering
     @products = @category.products
+                         .search_by_text(params[:search])
+                         .by_min_price(params[:min_price])
+                         .by_max_price(params[:max_price])
+                         .by_stock_status(params[:stock_status])
+                         .sorted_by(params[:sort])
+
+    @price_stats = @category.products.price_stats
+    @active_filters_count = count_active_filters
   end
 
   def new
@@ -47,6 +58,19 @@ class CategoriesController < ApplicationController
   end
 
   def category_params
-    params.require(:category).permit(:name, :description)
+    params.require(:category).permit(:name, :description, :image)
+  end
+
+  def search_params
+    params.permit(:search, :sort).to_h.symbolize_keys
+  end
+
+  def count_active_filters
+    count = 0
+    count += 1 if params[:search].present?
+    count += 1 if params[:min_price].present? || params[:max_price].present?
+    count += 1 if params[:stock_status].present?
+    count += 1 if params[:sort].present?
+    count
   end
 end

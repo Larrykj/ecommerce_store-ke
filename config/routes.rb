@@ -2,7 +2,13 @@ Rails.application.routes.draw do
   devise_for :users
   root "products#index"
 
-  resources :products
+  resources :products do
+    resources :reviews, only: [:create, :edit, :update, :destroy] do
+      member do
+        post :helpful
+      end
+    end
+  end
 resources :categories
 
   resource :cart, only: [ :show ]

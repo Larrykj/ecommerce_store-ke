@@ -3,9 +3,28 @@
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
 # Clear existing data
-# Clear existing data
+Review.destroy_all
 Product.destroy_all
 Category.destroy_all
+User.where.not(email: "admin@example.com").destroy_all
+
+# Create sample users for reviews
+puts "Creating sample users..."
+users = []
+user_data = [
+  { name: "John Kamau", email: "john@example.com", password: "password123" },
+  { name: "Mary Wanjiku", email: "mary@example.com", password: "password123" },
+  { name: "David Ochieng", email: "david@example.com", password: "password123" },
+  { name: "Grace Muthoni", email: "grace@example.com", password: "password123" },
+  { name: "Peter Njoroge", email: "peter@example.com", password: "password123" }
+]
+
+user_data.each do |data|
+  users << User.find_or_create_by!(email: data[:email]) do |user|
+    user.name = data[:name]
+    user.password = data[:password]
+  end
+end
 
 # Create Categories
 electronics = Category.create!(name: "Electronics", description: "Gadgets and devices for the modern Kenyan techie.")
@@ -201,4 +220,41 @@ Product.create!(
   category: beauty
 )
 
-puts "Created #{Category.count} categories and #{Product.count} products"
+# Create Sample Reviews
+puts "Creating sample reviews..."
+
+review_templates = [
+  { rating: 5, title: "Excellent product!", content: "I absolutely love this product! The quality exceeded my expectations. Would definitely recommend to everyone." },
+  { rating: 5, title: "Best purchase ever", content: "Amazing quality and fast delivery. This is exactly what I was looking for. Very satisfied with my purchase." },
+  { rating: 4, title: "Great value for money", content: "Good product overall. The quality is decent for the price. Would buy again if needed." },
+  { rating: 4, title: "Very satisfied", content: "Nice product, works as described. Happy with the quality and delivery was quick to Nairobi." },
+  { rating: 3, title: "It's okay", content: "The product is average. Does what it's supposed to do but nothing special. Fair price though." },
+  { rating: 5, title: "Highly recommended", content: "Outstanding quality! This product has become my favorite. The craftsmanship is superb and very authentic." },
+  { rating: 4, title: "Good quality", content: "Solid product with good build quality. Minor improvements could be made but overall very happy." },
+  { rating: 5, title: "Perfect!", content: "Everything about this product is perfect. From the packaging to the quality, it's all top-notch. Love it!" },
+  { rating: 3, title: "Decent purchase", content: "It's an okay product. Not bad but not exceptional either. Gets the job done for the price." },
+  { rating: 4, title: "Worth buying", content: "Very pleased with this purchase. Good quality and exactly as described. Fast shipping too!" }
+]
+
+# Add reviews to random products
+products = Product.all.to_a
+products.each do |product|
+  # Add 1-4 reviews per product
+  num_reviews = rand(1..4)
+  reviewers = users.sample(num_reviews)
+  
+  reviewers.each do |user|
+    template = review_templates.sample
+    Review.create!(
+      user: user,
+      product: product,
+      rating: template[:rating],
+      title: template[:title],
+      content: template[:content],
+      helpful_count: rand(0..15)
+    )
+  end
+end
+
+puts "Created #{Category.count} categories, #{Product.count} products, #{User.count} users, and #{Review.count} reviews"
+

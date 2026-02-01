@@ -1,6 +1,7 @@
 class Product < ApplicationRecord
   belongs_to :category, optional: true
   has_many :cart_items, dependent: :destroy
+  has_many :reviews, dependent: :destroy
   has_one_attached :image
 
   # Validations
@@ -126,4 +127,43 @@ class Product < ApplicationRecord
       "success"
     end
   end
+
+  # ============ RATING METHODS ============
+
+  # Get average rating for product
+  def average_rating
+    reviews.average(:rating)&.round(1) || 0
+  end
+
+  # Get review count
+  def reviews_count
+    reviews.count
+  end
+
+  # Get rating percentage (for progress bars)
+  def rating_percentage
+    (average_rating / 5.0 * 100).round
+  end
+
+  # Get rating distribution (count of each star level)
+  def rating_distribution
+    distribution = { 5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0 }
+    reviews.group(:rating).count.each do |rating, count|
+      distribution[rating] = count if distribution.key?(rating)
+    end
+    distribution
+  end
+
+  # Check if user has already reviewed this product
+  def reviewed_by?(user)
+    return false unless user
+    reviews.exists?(user_id: user.id)
+  end
+
+  # Get user's review for this product
+  def review_by(user)
+    return nil unless user
+    reviews.find_by(user_id: user.id)
+  end
 end
+
