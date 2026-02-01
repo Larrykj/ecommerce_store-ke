@@ -242,7 +242,7 @@ products.each do |product|
   # Add 1-4 reviews per product
   num_reviews = rand(1..4)
   reviewers = users.sample(num_reviews)
-  
+
   reviewers.each do |user|
     template = review_templates.sample
     Review.create!(
@@ -257,4 +257,3 @@ products.each do |product|
 end
 
 puts "Created #{Category.count} categories, #{Product.count} products, #{User.count} users, and #{Review.count} reviews"
-

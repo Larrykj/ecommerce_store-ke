@@ -166,4 +166,3 @@ class Product < ApplicationRecord
     reviews.find_by(user_id: user.id)
   end
 end
-
