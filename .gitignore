@@ -35,5 +35,3 @@
 
 # Ignore kamal secrets
 /.kamal/secrets
-/.config/database.yml
-
