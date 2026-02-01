@@ -2,6 +2,7 @@
 require "rubygems"
 require "bundler/setup"
 
-ARGV.unshift("--ensure-latest")
+# Removed --ensure-latest flag for CI compatibility
+# Use --ensure-latest locally if you want to enforce latest version
 
 load Gem.bin_path("brakeman", "brakeman")

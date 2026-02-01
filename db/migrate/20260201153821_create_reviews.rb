@@ -12,7 +12,7 @@ class CreateReviews < ActiveRecord::Migration[8.1]
     end
 
     # Ensure a user can only leave one review per product
-    add_index :reviews, [:user_id, :product_id], unique: true
+    add_index :reviews, [ :user_id, :product_id ], unique: true
     # Index for sorting by rating
     add_index :reviews, :rating
     add_index :reviews, :created_at

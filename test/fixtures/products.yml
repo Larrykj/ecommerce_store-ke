@@ -1,13 +1,27 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# Product Fixtures for Testing
+#
+# These fixtures provide test product data for integration tests.
+# Products are associated with category fixtures for testing category relationships.
+#
+# Validation requirements:
+# - name: minimum 3 characters, maximum 100
+# - description: minimum 10 characters
+# - price: greater than 0
+# - quantity: greater than or equal to 0
+#
+# Author: Larrykj
+# Last Updated: 2026-01-30
 
 one:
-  name: MyString
-  description: MyText
+  name: Test Product One
+  description: This is a test product with a long enough description
   price: 9.99
-  quantity: 1
+  quantity: 10
+  category: one
 
 two:
-  name: MyString
-  description: MyText
-  price: 9.99
-  quantity: 1
+  name: Test Product Two
+  description: This is another test product with a detailed description
+  price: 19.99
+  quantity: 5
+  category: two

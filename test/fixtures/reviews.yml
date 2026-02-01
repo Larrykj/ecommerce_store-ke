@@ -1,17 +1,29 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# Review Fixtures for Testing
+#
+# These fixtures provide test review data for integration tests.
+# Reviews are associated with user and product fixtures.
+#
+# Validation requirements:
+# - rating: 1-5 (required)
+# - content: minimum 10 characters
+# - title: maximum 100 characters (optional)
+# - user_id + product_id: unique combination
+#
+# Author: Larrykj
+# Last Updated: 2026-02-01
 
 one:
   user: one
   product: one
-  rating: 1
-  title: MyString
-  content: MyText
-  helpful_count: 1
+  rating: 5
+  title: "Great product!"
+  content: "This is an excellent product. I highly recommend it to everyone!"
+  helpful_count: 5
 
 two:
   user: two
   product: two
-  rating: 1
-  title: MyString
-  content: MyText
-  helpful_count: 1
+  rating: 4
+  title: "Very good"
+  content: "Good quality product with fast shipping. Very satisfied with my purchase."
+  helpful_count: 2
