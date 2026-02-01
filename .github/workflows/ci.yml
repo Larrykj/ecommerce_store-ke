@@ -67,28 +67,27 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: ecommerce_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
       RAILS_ENV: test
       DATABASE_HOST: 127.0.0.1
       DATABASE_PORT: 5432
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: postgres
+
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ecommerce_test
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -99,38 +98,48 @@ jobs:
         with:
           bundler-cache: true
 
-      - name: Setup database
+      - name: Install postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Wait for Postgres to be ready
         run: |
-          bin/rails db:create
-          bin/rails db:migrate
+          for i in {1..30}; do
+            pg_isready -h $DATABASE_HOST -p 5432 -U $DATABASE_USERNAME && break
+            echo "Waiting for Postgres... ($i)"
+            sleep 1
+          done
+
+      - name: Prepare test database
+        run: |
+          bin/rails db:create RAILS_ENV=test || true
+          bin/rails db:schema:load RAILS_ENV=test
 
       - name: Run tests
         run: bin/rails test
 
   system-test:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: ecommerce_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
       RAILS_ENV: test
       DATABASE_HOST: 127.0.0.1
       DATABASE_PORT: 5432
       DATABASE_USERNAME: postgres
       DATABASE_PASSWORD: postgres
+
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ecommerce_test
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -141,10 +150,21 @@ jobs:
         with:
           bundler-cache: true
 
-      - name: Setup database
+      - name: Install postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Wait for Postgres to be ready
         run: |
-          bin/rails db:create
-          bin/rails db:migrate
+          for i in {1..30}; do
+            pg_isready -h $DATABASE_HOST -p 5432 -U $DATABASE_USERNAME && break
+            echo "Waiting for Postgres... ($i)"
+            sleep 1
+          done
+
+      - name: Prepare test database
+        run: |
+          bin/rails db:create RAILS_ENV=test || true
+          bin/rails db:schema:load RAILS_ENV=test
 
       - name: Run System Tests
         run: bin/rails test:system
