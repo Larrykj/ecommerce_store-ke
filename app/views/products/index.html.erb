@@ -1,133 +1,499 @@
-<div class="container">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="display-4 fw-bold">Our Products</h1>
-    <div>
-      <span class="badge bg-primary fs-5 rounded-pill me-2"><%= @products.count %> Items</span>
-      <%= link_to 'Add New Product', new_product_path, class: 'btn btn-success' %>
+<div class="products-page">
+  <!-- Hero Search Section -->
+  <div class="search-hero">
+    <div class="search-hero-content">
+      <h1 class="search-title">Discover Amazing Products</h1>
+      <p class="search-subtitle">Find exactly what you're looking for</p>
+
+      <%= form_with url: products_path, method: :get, local: true, class: "hero-search-form" do |f| %>
+        <div class="hero-search-wrapper">
+          <i class="bi bi-search search-icon"></i>
+          <%= f.text_field :search,
+              value: params[:search],
+              class: "hero-search-input",
+              placeholder: "Search products by name or description...",
+              autocomplete: "off" %>
+          <%= f.submit "Search", class: "hero-search-btn" %>
+        </div>
+        <!-- Preserve filters -->
+        <%= hidden_field_tag :category_id, params[:category_id] if params[:category_id].present? %>
+        <%= hidden_field_tag :stock_status, params[:stock_status] if params[:stock_status].present? %>
+        <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+      <% end %>
     </div>
   </div>
 
-  <!-- Search and Filter Section -->
-  <div class="card mb-4 shadow-sm">
-    <div class="card-body">
-      <%= form_with url: products_path, method: :get, local: true, class: "row g-3" do |f| %>
-        <!-- Search Input -->
-        <div class="col-md-4">
-          <%= f.text_field :search, 
-              value: params[:search], 
-              class: "form-control", 
-              placeholder: "Search products..." %>
-        </div>
-
-        <!-- Category Filter -->
-        <div class="col-md-3">
-  <%= f.select :category_id, 
-      options_from_collection_for_select(@categories || [], :id, :name, params[:category_id]), 
-      { prompt: "All Categories" }, 
-      class: "form-select" %>
-</div>
-
-        <!-- Sort Options -->
-        <div class="col-md-3">
-          <%= f.select :sort, 
-              options_for_select([
-                ['Newest First', 'newest'],
-                ['Price: Low to High', 'price_asc'],
-                ['Price: High to Low', 'price_desc'],
-                ['Name: A-Z', 'name_asc'],
-                ['Name: Z-A', 'name_desc']
-              ], params[:sort]), 
-              { prompt: "Sort by" }, 
-              class: "form-select" %>
-        </div>
-
-        <!-- Search Button -->
-        <div class="col-md-2">
-          <div class="d-grid gap-2">
-            <%= f.submit "Search", class: "btn btn-primary w-100" %>
-            <% if params[:search].present? || params[:category_id].present? || params[:sort].present? %>
-              <%= link_to "Clear", products_path, class: "btn btn-outline-secondary w-100" %>
+  <div class="container-fluid products-container">
+    <div class="row">
+      <!-- Filter Sidebar -->
+      <div class="col-lg-3 col-md-4">
+        <div class="filter-sidebar">
+          <div class="filter-header">
+            <h5><i class="bi bi-sliders me-2"></i>Filters</h5>
+            <% if @active_filters_count.to_i > 0 %>
+              <span class="filter-badge"><%= @active_filters_count %></span>
             <% end %>
           </div>
-        </div>
-      <% end %>
-    </div>
-  </div>
 
-  <!-- Search Results Message -->
-  <% if params[:search].present? || params[:category_id].present? %>
-    <div class="alert alert-info">
-      <strong>Search Results:</strong> 
-      Found <%= @products.count %> product(s)
-      <% if params[:search].present? %>
-        matching "<%= params[:search] %>"
-      <% end %>
-      <% if params[:category_id].present? %>
-        in category "<%= Category.find(params[:category_id]).name %>"
-      <% end %>
-    </div>
-  <% end %>
+          <%= form_with url: products_path, method: :get, local: true, id: "sidebar-filter-form" do |f| %>
+            <%= hidden_field_tag :search, params[:search] if params[:search].present? %>
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="display-4 fw-bold">Our Products</h1>
-    <div>
-      <span class="badge bg-primary fs-5 rounded-pill me-2"><%= @products.count %> Items</span>
-      <%= link_to 'Add New Product', new_product_path, class: 'btn btn-success' %>
-    </div>
-  </div>
-
-  <% if @products.any? %>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      <% @products.each do |product| %>
-        <div class="col">
-          <div class="card h-100 shadow-sm border-0">
-            <!-- Product Image or Placeholder -->
-            <% if product.image.attached? %>
-              <%= image_tag product.image, class: 'card-img-top', style: 'height: 200px; object-fit: cover;', alt: product.name %>
-            <% else %>
-              <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                <i class="bi bi-box-seam display-1 text-secondary"></i>
-              </div>
-            <% end %>
-
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title fw-bold"><%= product.name %></h5>
-              
-              <!-- Category Badge -->
-              <% if product.category %>
-                <span class="badge bg-info mb-2"><%= product.category.name %></span>
-              <% end %>
-
-              <p class="card-text text-muted flex-grow-1"><%= truncate(product.description, length: 100) %></p>
-              <div class="d-flex justify-content-between align-items-center mt-3">
-                <span class="h4 mb-0 text-primary"><%= product.formatted_price %></span>
-                <small class="text-<%= product.quantity > 0 ? 'success' : 'danger' %> fw-bold">
-                  <%= product.quantity > 0 ? "#{product.quantity} in stock" : "Out of Stock" %>
-                </small>
+            <!-- Category Filter -->
+            <div class="filter-group">
+              <h6 class="filter-title"><i class="bi bi-grid me-2"></i>Category</h6>
+              <div class="filter-options">
+                <label class="filter-option <%= 'active' unless params[:category_id].present? %>">
+                  <%= f.radio_button :category_id, "", checked: !params[:category_id].present?, class: "filter-radio" %>
+                  <span>All Categories</span>
+                  <span class="option-count"><%= Product.count %></span>
+                </label>
+                <% @categories.each do |category| %>
+                  <label class="filter-option <%= 'active' if params[:category_id] == category.id.to_s %>">
+                    <%= f.radio_button :category_id, category.id, checked: params[:category_id] == category.id.to_s, class: "filter-radio" %>
+                    <span><%= category.name %></span>
+                    <span class="option-count"><%= category.products.count %></span>
+                  </label>
+                <% end %>
               </div>
             </div>
 
-            <div class="card-footer bg-white border-top-0 pb-3">
-              <div class="d-grid gap-2">
-                <% if product.in_stock? %>
-                  <%= button_to 'Add to Cart', cart_items_path(product_id: product.id), method: :post, class: 'btn btn-success' %>
+            <!-- Price Range -->
+            <div class="filter-group">
+              <h6 class="filter-title"><i class="bi bi-currency-dollar me-2"></i>Price Range</h6>
+              <div class="price-inputs">
+                <%= f.number_field :min_price, value: params[:min_price], class: "price-input", placeholder: "Min", min: 0 %>
+                <span class="price-sep">to</span>
+                <%= f.number_field :max_price, value: params[:max_price], class: "price-input", placeholder: "Max", min: 0 %>
+              </div>
+              <div class="price-presets">
+                <button type="button" class="preset-btn" data-min="0" data-max="1000">Under 1K</button>
+                <button type="button" class="preset-btn" data-min="1000" data-max="5000">1K-5K</button>
+                <button type="button" class="preset-btn" data-min="5000" data-max="">5K+</button>
+              </div>
+            </div>
+
+            <!-- Stock Status -->
+            <div class="filter-group">
+              <h6 class="filter-title"><i class="bi bi-box me-2"></i>Availability</h6>
+              <div class="filter-options">
+                <label class="filter-option <%= 'active' unless params[:stock_status].present? %>">
+                  <%= f.radio_button :stock_status, "", checked: !params[:stock_status].present?, class: "filter-radio" %>
+                  <span>All Items</span>
+                </label>
+                <label class="filter-option <%= 'active' if params[:stock_status] == 'in_stock' %>">
+                  <%= f.radio_button :stock_status, "in_stock", checked: params[:stock_status] == "in_stock", class: "filter-radio" %>
+                  <span><i class="bi bi-check-circle text-success me-1"></i>In Stock</span>
+                </label>
+                <label class="filter-option <%= 'active' if params[:stock_status] == 'out_of_stock' %>">
+                  <%= f.radio_button :stock_status, "out_of_stock", checked: params[:stock_status] == "out_of_stock", class: "filter-radio" %>
+                  <span><i class="bi bi-x-circle text-danger me-1"></i>Out of Stock</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Sort By -->
+            <div class="filter-group">
+              <h6 class="filter-title"><i class="bi bi-sort-down me-2"></i>Sort By</h6>
+              <%= f.select :sort,
+                  options_for_select([
+                    ["Newest First", "newest"],
+                    ["Price: Low to High", "price_asc"],
+                    ["Price: High to Low", "price_desc"],
+                    ["Name: A-Z", "name_asc"],
+                    ["Name: Z-A", "name_desc"]
+                  ], params[:sort] || "newest"),
+                  {},
+                  class: "sort-select" %>
+            </div>
+
+            <!-- Filter Actions -->
+            <div class="filter-actions">
+              <%= f.submit "Apply Filters", class: "apply-btn" %>
+              <% if @active_filters_count.to_i > 0 %>
+                <%= link_to products_path, class: "clear-btn" do %>
+                  <i class="bi bi-x-circle me-1"></i>Clear All
                 <% end %>
-                <div class="btn-group w-100" role="group">
-                  <%= link_to 'View', product_path(product), class: 'btn btn-outline-primary' %>
-                  <%= link_to 'Edit', edit_product_path(product), class: 'btn btn-outline-warning' %>
-                  <%= button_to 'Delete', product_path(product), method: :delete, data: { turbo_confirm: 'Are you sure?' }, class: 'btn btn-outline-danger' %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="col-lg-9 col-md-8">
+        <!-- Results Header -->
+        <div class="results-header">
+          <div class="results-info">
+            <h2 class="results-title">
+              <% if params[:search].present? %>
+                Results for "<%= params[:search] %>"
+              <% elsif params[:category_id].present? %>
+                <%= Category.find_by(id: params[:category_id])&.name || "Products" %>
+              <% else %>
+                All Products
+              <% end %>
+            </h2>
+            <p class="results-count"><%= @products.count %> product(s) found</p>
+          </div>
+          <%= link_to new_product_path, class: "add-product-btn" do %>
+            <i class="bi bi-plus-lg me-2"></i>Add Product
+          <% end %>
+        </div>
+
+        <!-- Active Filters -->
+        <% if @active_filters_count.to_i > 0 %>
+          <div class="active-filters">
+            <% if params[:search].present? %>
+              <span class="filter-tag">
+                <i class="bi bi-search me-1"></i>"<%= params[:search] %>"
+                <%= link_to products_path(request.query_parameters.except(:search)), class: "tag-remove" do %>
+                  <i class="bi bi-x"></i>
+                <% end %>
+              </span>
+            <% end %>
+            <% if params[:category_id].present? %>
+              <span class="filter-tag">
+                <%= Category.find_by(id: params[:category_id])&.name %>
+                <%= link_to products_path(request.query_parameters.except(:category_id)), class: "tag-remove" do %>
+                  <i class="bi bi-x"></i>
+                <% end %>
+              </span>
+            <% end %>
+            <% if params[:min_price].present? || params[:max_price].present? %>
+              <span class="filter-tag">
+                KSh <%= params[:min_price] || "0" %> - <%= params[:max_price] || "∞" %>
+                <%= link_to products_path(request.query_parameters.except(:min_price, :max_price)), class: "tag-remove" do %>
+                  <i class="bi bi-x"></i>
+                <% end %>
+              </span>
+            <% end %>
+            <% if params[:stock_status].present? %>
+              <span class="filter-tag">
+                <%= params[:stock_status] == "in_stock" ? "In Stock" : "Out of Stock" %>
+                <%= link_to products_path(request.query_parameters.except(:stock_status)), class: "tag-remove" do %>
+                  <i class="bi bi-x"></i>
+                <% end %>
+              </span>
+            <% end %>
+          </div>
+        <% end %>
+
+        <!-- Products Grid -->
+        <% if @products.any? %>
+          <div class="products-grid">
+            <% @products.each do |product| %>
+              <div class="product-card">
+                <div class="product-image-wrap">
+                  <% if product.image.attached? %>
+                    <%= image_tag product.image, class: "product-image", alt: product.name %>
+                  <% else %>
+                    <div class="product-placeholder">
+                      <i class="bi bi-box-seam"></i>
+                    </div>
+                  <% end %>
+                  <span class="stock-badge badge-<%= product.stock_status_class %>">
+                    <%= product.stock_status_label %>
+                  </span>
+                  <div class="product-overlay">
+                    <%= link_to product_path(product), class: "overlay-btn" do %>
+                      <i class="bi bi-eye"></i>
+                    <% end %>
+                    <%= link_to edit_product_path(product), class: "overlay-btn" do %>
+                      <i class="bi bi-pencil"></i>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="product-info">
+                  <% if product.category %>
+                    <span class="product-category"><%= product.category.name %></span>
+                  <% end %>
+                  <h3 class="product-name"><%= link_to product.name, product_path(product) %></h3>
+                  <p class="product-desc"><%= truncate(product.description, length: 80) %></p>
+                  <div class="product-footer">
+                    <div class="product-price">
+                      <span class="currency">KSh</span>
+                      <span class="amount"><%= number_with_delimiter(product.price.to_i) %></span>
+                    </div>
+                    <% if product.in_stock? %>
+                      <%= button_to cart_items_path(product_id: product.id), method: :post, class: "add-cart-btn" do %>
+                        <i class="bi bi-cart-plus"></i>
+                      <% end %>
+                    <% end %>
+                  </div>
                 </div>
               </div>
-            </div>
+            <% end %>
           </div>
-        </div>
-      <% end %>
+        <% else %>
+          <div class="empty-state">
+            <i class="bi bi-search empty-icon"></i>
+            <h3>No products found</h3>
+            <p>Try adjusting your search or filters</p>
+            <% if @active_filters_count.to_i > 0 %>
+              <%= link_to "Clear Filters", products_path, class: "btn btn-outline-primary" %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
     </div>
-  <% else %>
-    <div class="text-center py-5">
-      <i class="bi bi-inbox display-1 text-muted"></i>
-      <p class="lead mt-3">No products available yet.</p>
-      <%= link_to "Add Your First Product", new_product_path, class: "btn btn-primary btn-lg mt-2" %>
-    </div>
-  <% end %>
+  </div>
 </div>
+
+<style>
+:root {
+  --primary: #667eea;
+  --primary-dark: #5a67d8;
+  --secondary: #764ba2;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.products-page { background: #f8fafc; min-height: 100vh; }
+
+/* Hero Search */
+.search-hero {
+  background: var(--gradient);
+  padding: 60px 20px;
+  margin: -24px -12px 30px;
+  text-align: center;
+}
+.search-hero-content { max-width: 700px; margin: 0 auto; }
+.search-title { color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; }
+.search-subtitle { color: rgba(255,255,255,0.9); font-size: 1.1rem; margin-bottom: 25px; }
+.hero-search-wrapper {
+  display: flex; gap: 10px; background: white; padding: 8px;
+  border-radius: 50px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+.search-icon { padding: 12px 0 12px 20px; color: #667eea; font-size: 1.2rem; }
+.hero-search-input {
+  flex: 1; border: none; padding: 12px; font-size: 1rem;
+  background: transparent; outline: none;
+}
+.hero-search-btn {
+  padding: 12px 30px; background: var(--gradient); border: none;
+  border-radius: 50px; color: white; font-weight: 600; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.hero-search-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+
+/* Container */
+.products-container { padding: 0 20px; }
+
+/* Filter Sidebar */
+.filter-sidebar {
+  background: white; border-radius: 16px; padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: sticky; top: 20px;
+}
+.filter-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9;
+}
+.filter-header h5 { margin: 0; font-weight: 700; color: #1e293b; }
+.filter-badge {
+  background: var(--gradient); color: white; width: 24px; height: 24px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700;
+}
+.filter-group { margin-bottom: 24px; }
+.filter-title { font-size: 0.9rem; font-weight: 600; color: #475569; margin-bottom: 12px; }
+.filter-options { display: flex; flex-direction: column; gap: 8px; }
+.filter-option {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: #f8fafc; border-radius: 8px;
+  cursor: pointer; transition: all 0.2s; border: 2px solid transparent;
+}
+.filter-option:hover { background: #f1f5f9; }
+.filter-option.active { background: rgba(102,126,234,0.1); border-color: var(--primary); }
+.filter-radio { display: none; }
+.option-count { background: #e2e8f0; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; }
+
+/* Price Inputs */
+.price-inputs { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+.price-input {
+  flex: 1; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;
+  font-size: 0.9rem; text-align: center;
+}
+.price-input:focus { outline: none; border-color: var(--primary); }
+.price-sep { color: #94a3b8; }
+.price-presets { display: flex; gap: 8px; flex-wrap: wrap; }
+.preset-btn {
+  padding: 6px 12px; background: #f1f5f9; border: 1px solid #e2e8f0;
+  border-radius: 20px; font-size: 0.8rem; color: #667eea; cursor: pointer;
+}
+.preset-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* Sort Select */
+.sort-select {
+  width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0;
+  border-radius: 8px; font-size: 0.9rem; cursor: pointer;
+}
+.sort-select:focus { outline: none; border-color: var(--primary); }
+
+/* Filter Actions */
+.filter-actions { margin-top: 24px; padding-top: 20px; border-top: 2px solid #f1f5f9; }
+.apply-btn {
+  width: 100%; padding: 14px; background: var(--gradient); border: none;
+  border-radius: 10px; color: white; font-weight: 700; font-size: 1rem;
+  cursor: pointer; margin-bottom: 10px; transition: all 0.2s;
+}
+.apply-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+.clear-btn {
+  display: block; width: 100%; text-align: center; padding: 12px;
+  color: #64748b; text-decoration: none; border: 2px solid #e2e8f0;
+  border-radius: 10px; transition: all 0.2s;
+}
+.clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+/* Results Header */
+.results-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 16px;
+}
+.results-title { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0; }
+.results-count { color: #64748b; margin: 0; }
+.add-product-btn {
+  display: inline-flex; align-items: center; padding: 12px 24px;
+  background: var(--success); color: white; border-radius: 10px;
+  font-weight: 600; text-decoration: none; transition: all 0.2s;
+}
+.add-product-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.4); color: white; }
+
+/* Active Filters */
+.active-filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.filter-tag {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+  background: rgba(102,126,234,0.1); border-radius: 20px; font-size: 0.85rem; color: #667eea;
+}
+.tag-remove {
+  display: flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; background: rgba(102,126,234,0.2);
+  border-radius: 50%; color: var(--primary); transition: all 0.2s;
+}
+.tag-remove:hover { background: var(--primary); color: white; }
+
+/* Products Grid */
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+.product-card {
+  background: white; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: all 0.3s;
+}
+.product-card:hover { transform: translateY(-8px); box-shadow: 0 12px 30px rgba(0,0,0,0.12); }
+.product-image-wrap { position: relative; height: 200px; background: #f1f5f9; overflow: hidden; }
+.product-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+.product-card:hover .product-image { transform: scale(1.05); }
+.product-placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center;
+  justify-content: center; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+.product-placeholder i { font-size: 3rem; color: #cbd5e1; }
+.stock-badge {
+  position: absolute; top: 12px; left: 12px; padding: 5px 10px;
+  border-radius: 20px; font-size: 0.7rem; font-weight: 600;
+}
+.badge-success { background: rgba(16,185,129,0.9); color: white; }
+.badge-warning { background: rgba(245,158,11,0.95); color: #1e293b; }
+.badge-danger { background: rgba(239,68,68,0.9); color: white; }
+.product-overlay {
+  position: absolute; inset: 0; background: rgba(30,41,59,0.7);
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  opacity: 0; transition: opacity 0.3s;
+}
+.product-card:hover .product-overlay { opacity: 1; }
+.overlay-btn {
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  background: white; border-radius: 50%; color: #1e293b; font-size: 1.1rem;
+  transition: all 0.2s; transform: translateY(10px);
+}
+.product-card:hover .overlay-btn { transform: translateY(0); }
+.overlay-btn:hover { background: var(--primary); color: white; }
+.product-info { padding: 20px; }
+.product-category {
+  display: inline-block; padding: 4px 12px; background: rgba(102,126,234,0.1);
+  color: var(--primary); border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.product-name { font-size: 1.1rem; font-weight: 700; margin: 0 0 8px; }
+.product-name a { color: #1e293b; text-decoration: none; }
+.product-name a:hover { color: var(--primary); }
+.product-desc { color: #64748b; font-size: 0.9rem; margin: 0 0 16px; line-height: 1.5; }
+.product-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #f1f5f9; }
+.product-price { display: flex; align-items: baseline; gap: 4px; }
+.currency { font-size: 0.85rem; color: var(--primary); font-weight: 600; }
+.amount { font-size: 1.3rem; font-weight: 800; color: #1e293b; }
+.add-cart-btn {
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+  background: var(--gradient); border: none; border-radius: 10px; color: white;
+  font-size: 1.1rem; cursor: pointer; transition: all 0.2s;
+}
+.add-cart-btn:hover { transform: scale(1.1); box-shadow: 0 4px 15px rgba(102,126,234,0.4); }
+
+/* Empty State */
+.empty-state {
+  text-align: center; padding: 60px; background: white;
+  border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+}
+.empty-icon { font-size: 4rem; color: #cbd5e1; margin-bottom: 20px; }
+.empty-state h3 { color: #1e293b; margin-bottom: 8px; }
+.empty-state p { color: #64748b; margin-bottom: 20px; }
+
+/* Responsive */
+@media (max-width: 991px) {
+  .filter-sidebar { position: static; margin-bottom: 24px; }
+  .search-title { font-size: 2rem; }
+}
+@media (max-width: 767px) {
+  .search-hero { padding: 40px 16px; margin: -24px -12px 20px; }
+  .search-title { font-size: 1.6rem; }
+  .hero-search-wrapper { flex-direction: column; border-radius: 16px; }
+  .hero-search-btn { border-radius: 10px; }
+  .products-grid { grid-template-columns: 1fr; }
+  .results-header { flex-direction: column; align-items: stretch; }
+  .add-product-btn { justify-content: center; }
+}
+</style>
+
+<script>
+function initFilters() {
+  var sidebarForm = document.getElementById("sidebar-filter-form");
+
+  if (sidebarForm) {
+    // Auto-submit on radio button change
+    sidebarForm.querySelectorAll(".filter-radio").forEach(function(radio) {
+      radio.addEventListener("change", function() {
+        var options = this.closest(".filter-options");
+        if (options) {
+          options.querySelectorAll(".filter-option").forEach(function(opt) {
+            opt.classList.remove("active");
+          });
+          this.closest("label").classList.add("active");
+        }
+        setTimeout(function() { sidebarForm.submit(); }, 100);
+      });
+    });
+
+    // Auto-submit on sort change
+    var sortSelect = sidebarForm.querySelector(".sort-select");
+    if (sortSelect) {
+      sortSelect.addEventListener("change", function() { sidebarForm.submit(); });
+    }
+  }
+
+  // Price presets
+  document.querySelectorAll(".preset-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var minInput = document.querySelector("input[name='min_price']");
+      var maxInput = document.querySelector("input[name='max_price']");
+      if (minInput) minInput.value = this.dataset.min;
+      if (maxInput) maxInput.value = this.dataset.max;
+      var form = document.getElementById("sidebar-filter-form");
+      if (form) setTimeout(function() { form.submit(); }, 150);
+    });
+  });
+}
+
+// Works with both Turbo and regular page loads
+document.addEventListener("turbo:load", initFilters);
+document.addEventListener("DOMContentLoaded", initFilters);
+</script>

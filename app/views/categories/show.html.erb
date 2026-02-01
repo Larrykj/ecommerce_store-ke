@@ -1,56 +1,331 @@
-<div class="container">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h1 class="display-4 fw-bold"><%= @category.name %></h1>
-      <p class="lead text-muted"><%= @category.description %></p>
+<div class="category-show-page">
+  <!-- Category Header -->
+  <div class="category-hero">
+    <% if @category.image.attached? %>
+      <div class="hero-bg-image" style="background-image: url('<%= url_for(@category.image) %>')"></div>
+    <% end %>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="category-badge"><i class="bi bi-grid-3x3-gap me-2"></i>Category</span>
+      <h1 class="category-title"><%= @category.name %></h1>
+      <% if @category.description.present? %>
+        <p class="category-desc"><%= @category.description %></p>
+      <% end %>
+      <div class="category-stats">
+        <span class="stat-pill"><i class="bi bi-box me-1"></i><%= @category.products.count %> products</span>
+        <% if @category.products.any? %>
+          <span class="stat-pill"><i class="bi bi-currency-dollar me-1"></i>From KSh <%= number_with_delimiter(@price_stats[:min].to_i) %></span>
+        <% end %>
+        <% if @category.total_reviews_count > 0 %>
+          <span class="stat-pill rating"><i class="bi bi-star-fill me-1"></i><%= @category.average_rating %> (<%= @category.total_reviews_count %> reviews)</span>
+        <% end %>
+      </div>
     </div>
-    <div class="btn-group">
-      <%= link_to 'Edit Category', edit_category_path(@category), class: 'btn btn-outline-warning' %>
-      <%= link_to 'Back to Categories', categories_path, class: 'btn btn-outline-secondary' %>
+    <div class="hero-actions">
+      <%= link_to edit_category_path(@category), class: "hero-btn secondary" do %>
+        <i class="bi bi-pencil me-2"></i>Edit
+      <% end %>
+      <%= link_to categories_path, class: "hero-btn primary" do %>
+        <i class="bi bi-arrow-left me-2"></i>All Categories
+      <% end %>
     </div>
   </div>
 
-  <hr class="my-4">
+  <div class="container-fluid category-container">
+    <% if @category.products.any? %>
+      <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 col-md-4">
+          <div class="filter-card">
+            <div class="filter-header">
+              <h5><i class="bi bi-funnel me-2"></i>Filter Products</h5>
+              <% if @active_filters_count.to_i > 0 %>
+                <span class="filter-count"><%= @active_filters_count %></span>
+              <% end %>
+            </div>
 
-  <h2 class="mb-4">Products in this Category</h2>
+            <%= form_with url: category_path(@category), method: :get, local: true, id: "category-filter-form", data: { turbo_frame: "_top" } do |f| %>
+              <!-- Search -->
+              <div class="filter-section">
+                <label class="filter-label"><i class="bi bi-search me-2"></i>Search</label>
+                <%= f.text_field :search, value: params[:search], class: "filter-input", placeholder: "Search in #{@category.name}..." %>
+              </div>
 
-  <% if @products.any? %>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      <% @products.each do |product| %>
-        <div class="col">
-          <div class="card h-100 shadow-sm border-0">
-            <% if product.image.attached? %>
-              <%= image_tag product.image, class: 'card-img-top', style: 'height: 200px; object-fit: cover;', alt: product.name %>
-            <% else %>
-              <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                <i class="bi bi-box-seam display-1 text-secondary"></i>
+              <!-- Price Range -->
+              <div class="filter-section">
+                <label class="filter-label"><i class="bi bi-currency-dollar me-2"></i>Price Range</label>
+                <div class="price-row">
+                  <%= f.number_field :min_price, value: params[:min_price], class: "price-field", placeholder: "Min", min: 0 %>
+                  <span class="price-divider">to</span>
+                  <%= f.number_field :max_price, value: params[:max_price], class: "price-field", placeholder: "Max", min: 0 %>
+                </div>
+              </div>
+
+              <!-- Stock Status -->
+              <div class="filter-section">
+                <label class="filter-label"><i class="bi bi-box me-2"></i>Availability</label>
+                <div class="radio-group">
+                  <label class="radio-option <%= 'active' unless params[:stock_status].present? %>">
+                    <%= f.radio_button :stock_status, "", checked: !params[:stock_status].present?, class: "radio-input" %>
+                    All Products
+                  </label>
+                  <label class="radio-option <%= 'active' if params[:stock_status] == 'in_stock' %>">
+                    <%= f.radio_button :stock_status, "in_stock", checked: params[:stock_status] == "in_stock", class: "radio-input" %>
+                    In Stock Only
+                  </label>
+                  <label class="radio-option <%= 'active' if params[:stock_status] == 'out_of_stock' %>">
+                    <%= f.radio_button :stock_status, "out_of_stock", checked: params[:stock_status] == "out_of_stock", class: "radio-input" %>
+                    Out of Stock
+                  </label>
+                </div>
+              </div>
+
+              <!-- Sort -->
+              <div class="filter-section">
+                <label class="filter-label"><i class="bi bi-sort-down me-2"></i>Sort By</label>
+                <%= f.select :sort, options_for_select([
+                  ["Newest First", "newest"],
+                  ["Price: Low to High", "price_asc"],
+                  ["Price: High to Low", "price_desc"],
+                  ["Name: A-Z", "name_asc"]
+                ], params[:sort] || "newest"), {}, class: "sort-dropdown" %>
+              </div>
+
+              <!-- Actions -->
+              <div class="filter-actions">
+                <%= f.submit "Apply Filters", class: "btn-apply" %>
+                <% if @active_filters_count.to_i > 0 %>
+                  <%= link_to category_path(@category), class: "btn-clear" do %>
+                    <i class="bi bi-x-circle me-1"></i>Clear All
+                  <% end %>
+                <% end %>
               </div>
             <% end %>
-
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title fw-bold"><%= product.name %></h5>
-              <p class="card-text text-muted flex-grow-1"><%= truncate(product.description, length: 100) %></p>
-              <div class="d-flex justify-content-between align-items-center mt-3">
-                <span class="h4 mb-0 text-primary"><%= product.formatted_price %></span>
-                <small class="text-<%= product.quantity > 0 ? 'success' : 'danger' %> fw-bold">
-                  <%= product.quantity > 0 ? "#{product.quantity} in stock" : "Out of Stock" %>
-                </small>
-              </div>
-            </div>
-
-            <div class="card-footer bg-white border-top-0 pb-3">
-              <div class="d-grid gap-2">
-                <%= link_to 'View Product', product_path(product), class: 'btn btn-outline-primary' %>
-              </div>
-            </div>
           </div>
         </div>
-      <% end %>
-    </div>
-  <% else %>
-    <div class="text-center py-5">
-      <i class="bi bi-box-seam display-1 text-muted"></i>
-      <p class="lead mt-3">No products in this category yet.</p>
-    </div>
-  <% end %>
+
+        <!-- Products Grid -->
+        <div class="col-lg-9 col-md-8">
+          <div class="results-bar">
+            <span class="results-text">
+              <strong><%= @products.count %></strong> of <%= @category.products.count %> products
+              <% if params[:search].present? %> for "<%= params[:search] %>"<% end %>
+            </span>
+          </div>
+
+          <% if @products.any? %>
+            <div class="products-grid">
+              <% @products.each do |product| %>
+                <div class="product-card">
+                  <div class="product-image-wrap">
+                    <% if product.image.attached? %>
+                      <%= image_tag product.image, class: "product-image", alt: product.name %>
+                    <% else %>
+                      <div class="product-placeholder"><i class="bi bi-box-seam"></i></div>
+                    <% end %>
+                    <span class="stock-badge badge-<%= product.stock_status_class %>"><%= product.stock_status_label %></span>
+                    <div class="product-overlay">
+                      <%= link_to product_path(product), class: "overlay-btn" do %><i class="bi bi-eye"></i><% end %>
+                      <% if product.in_stock? %>
+                        <%= button_to cart_items_path(product_id: product.id), method: :post, class: "overlay-btn cart" do %><i class="bi bi-cart-plus"></i><% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                  <div class="product-info">
+                    <h3 class="product-name"><%= link_to product.name, product_path(product) %></h3>
+                    
+                    <!-- Rating Display -->
+                    <% if product.reviews_count > 0 %>
+                      <div class="product-rating">
+                        <div class="stars">
+                          <% 5.times do |i| %>
+                            <i class="bi bi-star<%= i < product.average_rating.round ? '-fill' : '' %>"></i>
+                          <% end %>
+                        </div>
+                        <span class="rating-text"><%= product.average_rating %> (<%= product.reviews_count %>)</span>
+                      </div>
+                    <% end %>
+                    
+                    <p class="product-desc"><%= truncate(product.description, length: 70) %></p>
+                    <div class="product-footer">
+                      <div class="product-price">
+                        <span class="currency">KSh</span>
+                        <span class="amount"><%= number_with_delimiter(product.price.to_i) %></span>
+                      </div>
+                      <% if product.in_stock? %>
+                        <%= button_to cart_items_path(product_id: product.id), method: :post, class: "add-btn" do %><i class="bi bi-cart-plus"></i><% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="no-results">
+              <i class="bi bi-search no-results-icon"></i>
+              <h3>No products match your filters</h3>
+              <p>Try adjusting your search criteria</p>
+              <%= link_to category_path(@category), class: "btn btn-primary" do %>
+                <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Filters
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="empty-category">
+        <i class="bi bi-box empty-icon"></i>
+        <h3>No Products Yet</h3>
+        <p>This category doesn't have any products.</p>
+        <%= link_to new_product_path(category_id: @category.id), class: "btn btn-primary" do %>
+          <i class="bi bi-plus-lg me-2"></i>Add First Product
+        <% end %>
+      </div>
+    <% end %>
+  </div>
 </div>
+
+<style>
+:root { --primary: #667eea; --secondary: #764ba2; --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+.category-show-page { background: #f8fafc; min-height: 100vh; }
+
+/* Hero with Background Image */
+.category-hero {
+  position: relative;
+  padding: 60px 30px;
+  margin: -24px -12px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  overflow: hidden;
+}
+.hero-bg-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(3px);
+  transform: scale(1.1);
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(102,126,234,0.9) 0%, rgba(118,75,162,0.9) 100%);
+}
+.hero-content { position: relative; z-index: 1; max-width: 600px; }
+.category-badge { display: inline-flex; align-items: center; padding: 6px 14px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-size: 0.85rem; margin-bottom: 12px; }
+.category-title { color: white; font-size: 2.5rem; font-weight: 800; margin: 0 0 10px; }
+.category-desc { color: rgba(255,255,255,0.9); font-size: 1.1rem; margin: 0 0 16px; }
+.category-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat-pill { display: inline-flex; align-items: center; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-size: 0.85rem; }
+.stat-pill.rating i { color: #fbbf24; }
+.hero-actions { position: relative; z-index: 1; display: flex; gap: 12px; }
+.hero-btn { display: inline-flex; align-items: center; padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+.hero-btn.secondary { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); }
+.hero-btn.secondary:hover { background: rgba(255,255,255,0.3); color: white; }
+.hero-btn.primary { background: white; color: var(--primary); }
+.hero-btn.primary:hover { transform: translateY(-2px); color: var(--primary); }
+
+/* Container */
+.category-container { padding: 0 30px; }
+
+/* Filter Card */
+.filter-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: sticky; top: 20px; }
+.filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9; }
+.filter-header h5 { margin: 0; font-weight: 700; color: #1e293b; }
+.filter-count { width: 24px; height: 24px; background: var(--gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+.filter-section { margin-bottom: 20px; }
+.filter-label { display: flex; align-items: center; font-size: 0.9rem; font-weight: 600; color: #475569; margin-bottom: 10px; }
+.filter-input, .price-field, .sort-dropdown { width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; }
+.filter-input:focus, .price-field:focus, .sort-dropdown:focus { outline: none; border-color: var(--primary); }
+.price-row { display: flex; gap: 10px; align-items: center; }
+.price-field { flex: 1; text-align: center; }
+.price-divider { color: #94a3b8; }
+.radio-group { display: flex; flex-direction: column; gap: 8px; }
+.radio-option { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #f8fafc; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+.radio-option:hover { background: #f1f5f9; }
+.radio-option.active { background: rgba(102,126,234,0.1); border-color: var(--primary); }
+.radio-input { display: none; }
+.filter-actions { margin-top: 24px; padding-top: 20px; border-top: 2px solid #f1f5f9; }
+.btn-apply { width: 100%; padding: 14px; background: var(--gradient); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; margin-bottom: 10px; transition: all 0.2s; }
+.btn-apply:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+.btn-clear { display: block; width: 100%; text-align: center; padding: 12px; color: #64748b; text-decoration: none; border: 2px solid #e2e8f0; border-radius: 10px; transition: all 0.2s; }
+.btn-clear:hover { border-color: var(--danger); color: var(--danger); }
+
+/* Results */
+.results-bar { margin-bottom: 20px; padding: 12px 16px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.results-text { color: #64748b; }
+
+/* Products Grid */
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+.product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: all 0.3s; }
+.product-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(0,0,0,0.12); }
+.product-image-wrap { position: relative; height: 180px; background: #f1f5f9; overflow: hidden; }
+.product-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+.product-card:hover .product-image { transform: scale(1.05); }
+.product-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); }
+.product-placeholder i { font-size: 3rem; color: #cbd5e1; }
+.stock-badge { position: absolute; top: 10px; left: 10px; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+.badge-success { background: rgba(16,185,129,0.9); color: white; }
+.badge-warning { background: rgba(245,158,11,0.95); color: #1e293b; }
+.badge-danger { background: rgba(239,68,68,0.9); color: white; }
+.product-overlay { position: absolute; inset: 0; background: rgba(30,41,59,0.7); display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0; transition: opacity 0.3s; }
+.product-card:hover .product-overlay { opacity: 1; }
+.overlay-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: white; border: none; border-radius: 50%; color: #1e293b; font-size: 1rem; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.overlay-btn:hover { background: var(--primary); color: white; }
+.overlay-btn.cart:hover { background: var(--success); }
+.product-info { padding: 16px; }
+.product-name { font-size: 1rem; font-weight: 700; margin: 0 0 8px; }
+.product-name a { color: #1e293b; text-decoration: none; }
+.product-name a:hover { color: var(--primary); }
+
+/* Product Rating */
+.product-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.stars { display: flex; gap: 2px; }
+.stars i { font-size: 0.85rem; color: #fbbf24; }
+.rating-text { font-size: 0.8rem; color: #64748b; }
+
+.product-desc { color: #64748b; font-size: 0.85rem; margin: 0 0 14px; line-height: 1.5; }
+.product-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid #f1f5f9; }
+.product-price { display: flex; align-items: baseline; gap: 4px; }
+.currency { font-size: 0.8rem; color: var(--primary); font-weight: 600; }
+.amount { font-size: 1.2rem; font-weight: 800; color: #1e293b; }
+.add-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--gradient); border: none; border-radius: 8px; color: white; cursor: pointer; transition: all 0.2s; }
+.add-btn:hover { transform: scale(1.1); }
+
+/* Empty/No Results */
+.no-results, .empty-category { text-align: center; padding: 60px; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+.no-results-icon, .empty-icon { font-size: 3rem; color: #cbd5e1; margin-bottom: 20px; display: block; }
+.no-results h3, .empty-category h3 { color: #1e293b; margin-bottom: 8px; }
+.no-results p, .empty-category p { color: #64748b; margin-bottom: 20px; }
+
+/* Responsive */
+@media (max-width: 991px) { .filter-card { position: static; margin-bottom: 24px; } }
+@media (max-width: 767px) { .category-hero { flex-direction: column; text-align: center; } .hero-actions { width: 100%; justify-content: center; } .category-stats { justify-content: center; } .category-container { padding: 0 16px; } .products-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+function initCategoryFilters() {
+  var form = document.getElementById("category-filter-form");
+  if (form) {
+    form.querySelectorAll(".radio-input").forEach(function(radio) {
+      radio.addEventListener("change", function() {
+        var group = this.closest(".radio-group");
+        if (group) {
+          group.querySelectorAll(".radio-option").forEach(function(opt) { opt.classList.remove("active"); });
+          this.closest("label").classList.add("active");
+        }
+        setTimeout(function() { form.submit(); }, 100);
+      });
+    });
+    var sortDropdown = form.querySelector(".sort-dropdown");
+    if (sortDropdown) {
+      sortDropdown.addEventListener("change", function() { form.submit(); });
+    }
+  }
+}
+document.addEventListener("turbo:load", initCategoryFilters);
+document.addEventListener("DOMContentLoaded", initCategoryFilters);
+</script>

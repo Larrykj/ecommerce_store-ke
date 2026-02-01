@@ -1,0 +1,117 @@
+<div class="edit-review-page">
+  <div class="container">
+    <nav class="breadcrumb-nav">
+      <%= link_to products_path, class: "breadcrumb-link" do %>
+        <i class="bi bi-house me-1"></i>Products
+      <% end %>
+      <i class="bi bi-chevron-right breadcrumb-sep"></i>
+      <%= link_to @product.name, product_path(@product), class: "breadcrumb-link" %>
+      <i class="bi bi-chevron-right breadcrumb-sep"></i>
+      <span class="breadcrumb-current">Edit Review</span>
+    </nav>
+
+    <div class="edit-review-card">
+      <div class="card-header">
+        <h1><i class="bi bi-pencil-square me-2"></i>Edit Your Review</h1>
+        <p>Update your review for <strong><%= @product.name %></strong></p>
+      </div>
+
+      <%= form_with model: [@product, @review], local: true, class: "review-form" do |f| %>
+        <% if @review.errors.any? %>
+          <div class="error-box">
+            <h4><%= pluralize(@review.errors.count, "error") %> prevented your review from being saved:</h4>
+            <ul>
+              <% @review.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="form-group">
+          <label class="form-label">Your Rating</label>
+          <div class="star-rating-input">
+            <% 5.downto(1) do |i| %>
+              <%= f.radio_button :rating, i, id: "rating-#{i}", class: "star-input", checked: @review.rating == i %>
+              <label for="rating-<%= i %>" class="star-label-input"><i class="bi bi-star-fill"></i></label>
+            <% end %>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Review Title (Optional)</label>
+          <%= f.text_field :title, class: "form-control", placeholder: "Summarize your experience" %>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Your Review</label>
+          <%= f.text_area :content, class: "form-control", rows: 5, placeholder: "Share your experience with this product (minimum 10 characters)" %>
+        </div>
+        
+        <div class="form-actions">
+          <%= f.submit "Update Review", class: "btn-submit" %>
+          <%= link_to product_path(@product), class: "btn-cancel" do %>
+            Cancel
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+:root {
+  --primary: #667eea;
+  --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --star-color: #fbbf24;
+  --danger: #ef4444;
+}
+
+.edit-review-page { background: #f8fafc; min-height: 100vh; padding: 30px 0; }
+.edit-review-page .container { max-width: 700px; padding: 0 20px; }
+
+/* Breadcrumb */
+.breadcrumb-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 0.9rem; flex-wrap: wrap; }
+.breadcrumb-link { color: var(--primary); text-decoration: none; }
+.breadcrumb-link:hover { text-decoration: underline; }
+.breadcrumb-sep { color: #cbd5e1; font-size: 0.75rem; }
+.breadcrumb-current { color: #64748b; }
+
+/* Card */
+.edit-review-card { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.card-header { margin-bottom: 30px; text-align: center; }
+.card-header h1 { font-size: 1.75rem; font-weight: 800; color: #1e293b; margin: 0 0 8px; }
+.card-header p { color: #64748b; margin: 0; }
+
+/* Form */
+.review-form { display: flex; flex-direction: column; gap: 24px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-label { font-weight: 600; color: #475569; font-size: 0.95rem; }
+.form-control { padding: 14px 18px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; transition: border-color 0.2s; }
+.form-control:focus { outline: none; border-color: var(--primary); }
+
+/* Star Input */
+.star-rating-input { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 6px; }
+.star-input { display: none; }
+.star-label-input { cursor: pointer; font-size: 2.5rem; color: #e2e8f0; transition: color 0.2s; }
+.star-label-input:hover, .star-label-input:hover ~ .star-label-input,
+.star-input:checked ~ .star-label-input { color: var(--star-color); }
+
+/* Error Box */
+.error-box { background: rgba(239,68,68,0.1); border: 2px solid rgba(239,68,68,0.3); border-radius: 12px; padding: 20px; }
+.error-box h4 { color: var(--danger); font-size: 1rem; margin: 0 0 12px; }
+.error-box ul { margin: 0; padding-left: 20px; }
+.error-box li { color: #1e293b; font-size: 0.9rem; }
+
+/* Actions */
+.form-actions { display: flex; gap: 16px; margin-top: 10px; }
+.btn-submit { flex: 1; padding: 16px 32px; background: var(--gradient); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+.btn-cancel { padding: 16px 32px; background: #f1f5f9; color: #64748b; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; text-decoration: none; text-align: center; transition: all 0.2s; }
+.btn-cancel:hover { background: #e2e8f0; color: #475569; }
+
+@media (max-width: 576px) {
+  .edit-review-card { padding: 24px; }
+  .form-actions { flex-direction: column; }
+}
+</style>

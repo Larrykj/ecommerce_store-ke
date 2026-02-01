@@ -3,8 +3,11 @@ class ProductsController < ApplicationController
 
   # GET /products
   def index
-    @products = Product.all
-     @categories = Category.all  # <-- Make sure this line exists
+    @categories = Category.all
+    @price_stats = Product.price_stats
+    @products = Product.advanced_search(search_params)
+    @active_filters_count = count_active_filters
+    @search_params = search_params
   end
 
   # GET /products/:id
@@ -53,6 +56,20 @@ class ProductsController < ApplicationController
   end
 
   def product_params
-      params.require(:product).permit(:name, :description, :price, :quantity, :image, :category_id)
+    params.require(:product).permit(:name, :description, :price, :quantity, :image, :category_id)
+  end
+
+  def search_params
+    params.permit(:search, :category_id, :min_price, :max_price, :stock_status, :sort).to_h.symbolize_keys
+  end
+
+  def count_active_filters
+    count = 0
+    count += 1 if params[:search].present?
+    count += 1 if params[:category_id].present?
+    count += 1 if params[:min_price].present? || params[:max_price].present?
+    count += 1 if params[:stock_status].present?
+    count += 1 if params[:sort].present?
+    count
   end
 end
