@@ -1,42 +1,293 @@
-<div class="container">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="display-4 fw-bold">Explore Our Kenyan Market</h1>
-    <p class="lead text-muted">Discover authentic products from across Africa, curated just for you.</p>
-    <div>
-      <span class="badge bg-primary fs-5 rounded-pill me-2"><%= @categories.count %> Categories</span>
-      <%= link_to 'Add New Category', new_category_path, class: 'btn btn-success' %>
+<div class="categories-page">
+  <!-- Hero Section -->
+  <div class="categories-hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Browse Categories</h1>
+      <p class="hero-subtitle">Explore our curated collection of products organized just for you</p>
     </div>
   </div>
 
-  <% if @categories.any? %>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      <% @categories.each do |category| %>
-        <div class="col">
-          <div class="card h-100 shadow-sm border-0">
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title fw-bold"><%= category.name %></h5>
-              <p class="card-text text-muted flex-grow-1"><%= truncate(category.description, length: 100) %></p>
-              <div class="d-flex justify-content-between align-items-center mt-3">
-                <span class="text-secondary"><%= pluralize(category.products.count, 'Product') %></span>
-              </div>
-            </div>
-
-            <div class="card-footer bg-white border-top-0 pb-3">
-              <div class="btn-group w-100" role="group">
-                <%= link_to 'View', category_path(category), class: 'btn btn-outline-primary' %>
-                <%= link_to 'Edit', edit_category_path(category), class: 'btn btn-outline-warning' %>
-                <%= button_to 'Delete', category_path(category), method: :delete, data: { turbo_confirm: 'Are you sure?' }, class: 'btn btn-outline-danger' %>
-              </div>
-            </div>
-          </div>
-        </div>
+  <div class="container categories-container">
+    <!-- Header -->
+    <div class="categories-header">
+      <div class="header-info">
+        <span class="category-count"><%= @categories.count %> Categories</span>
+      </div>
+      <%= link_to new_category_path, class: "add-category-btn" do %>
+        <i class="bi bi-plus-lg me-2"></i>New Category
       <% end %>
     </div>
-  <% else %>
-    <div class="text-center py-5">
-      <i class="bi bi-tags display-1 text-muted"></i>
-      <p class="lead mt-3">No categories found.</p>
-      <%= link_to "Create First Category", new_category_path, class: "btn btn-primary btn-lg mt-2" %>
-    </div>
-  <% end %>
+
+    <% if @categories.any? %>
+      <div class="categories-grid">
+        <% @categories.each do |category| %>
+          <div class="category-card">
+            <div class="card-icon">
+              <i class="bi bi-grid-3x3-gap"></i>
+            </div>
+            <div class="card-content">
+              <h3 class="card-title"><%= link_to category.name, category_path(category) %></h3>
+              <p class="card-desc"><%= truncate(category.description, length: 100) || "No description available" %></p>
+              <div class="card-stats">
+                <span class="stat">
+                  <i class="bi bi-box me-1"></i>
+                  <%= pluralize(category.products.count, "product") %>
+                </span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <%= link_to category_path(category), class: "action-btn view" do %>
+                <i class="bi bi-eye"></i>
+                <span>View</span>
+              <% end %>
+              <%= link_to edit_category_path(category), class: "action-btn edit" do %>
+                <i class="bi bi-pencil"></i>
+                <span>Edit</span>
+              <% end %>
+              <%= button_to category_path(category), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this category?" }, class: "action-btn delete" do %>
+                <i class="bi bi-trash"></i>
+                <span>Delete</span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-tags"></i>
+        </div>
+        <h3>No Categories Yet</h3>
+        <p>Create your first category to organize your products</p>
+        <%= link_to new_category_path, class: "btn-create" do %>
+          <i class="bi bi-plus-lg me-2"></i>Create First Category
+        <% end %>
+      </div>
+    <% end %>
+  </div>
 </div>
+
+<style>
+:root {
+  --primary: #667eea;
+  --secondary: #764ba2;
+  --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+.categories-page { background: #f8fafc; min-height: 100vh; }
+
+/* Hero */
+.categories-hero {
+  background: var(--gradient);
+  padding: 60px 20px;
+  margin: -24px -12px 40px;
+  text-align: center;
+  position: relative;
+}
+.categories-hero::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-content { position: relative; z-index: 1; }
+.hero-title { color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; }
+.hero-subtitle { color: rgba(255,255,255,0.9); font-size: 1.1rem; }
+
+/* Container */
+.categories-container { max-width: 1200px; padding: 0 20px; }
+
+/* Header */
+.categories-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.category-count {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+.add-category-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 24px;
+  background: var(--success);
+  color: white;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.add-category-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16,185,129,0.4);
+  color: white;
+}
+
+/* Grid */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+/* Card */
+.category-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s;
+}
+.category-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+.card-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--gradient);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.card-icon i { font-size: 1.5rem; color: white; }
+.card-content { flex: 1; }
+.card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+.card-title a {
+  color: #1e293b;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.card-title a:hover { color: var(--primary); }
+.card-desc {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+.card-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #f1f5f9;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #475569;
+}
+.stat i { color: var(--primary); }
+
+/* Actions */
+.card-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
+}
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+.action-btn.view {
+  background: rgba(102,126,234,0.1);
+  color: var(--primary);
+}
+.action-btn.view:hover {
+  background: var(--primary);
+  color: white;
+}
+.action-btn.edit {
+  background: rgba(245,158,11,0.1);
+  color: var(--warning);
+}
+.action-btn.edit:hover {
+  background: var(--warning);
+  color: white;
+}
+.action-btn.delete {
+  background: rgba(239,68,68,0.1);
+  color: var(--danger);
+}
+.action-btn.delete:hover {
+  background: var(--danger);
+  color: white;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+}
+.empty-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 24px;
+  background: var(--gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.empty-icon i { font-size: 2.5rem; color: white; }
+.empty-state h3 { font-size: 1.5rem; color: #1e293b; margin-bottom: 10px; }
+.empty-state p { color: #64748b; margin-bottom: 24px; }
+.btn-create {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 28px;
+  background: var(--gradient);
+  color: white;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-create:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .hero-title { font-size: 1.8rem; }
+  .categories-grid { grid-template-columns: 1fr; }
+  .card-actions { flex-direction: column; }
+  .action-btn span { display: inline; }
+}
+</style>

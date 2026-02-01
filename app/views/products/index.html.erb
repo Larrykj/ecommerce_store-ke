@@ -455,26 +455,26 @@
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const sidebarForm = document.getElementById("sidebar-filter-form");
+function initFilters() {
+  var sidebarForm = document.getElementById("sidebar-filter-form");
 
-  // Auto-submit on radio button change
   if (sidebarForm) {
+    // Auto-submit on radio button change
     sidebarForm.querySelectorAll(".filter-radio").forEach(function(radio) {
       radio.addEventListener("change", function() {
-        const options = this.closest(".filter-options");
+        var options = this.closest(".filter-options");
         if (options) {
           options.querySelectorAll(".filter-option").forEach(function(opt) {
             opt.classList.remove("active");
           });
           this.closest("label").classList.add("active");
         }
-        setTimeout(function() { sidebarForm.submit(); }, 150);
+        setTimeout(function() { sidebarForm.submit(); }, 100);
       });
     });
 
     // Auto-submit on sort change
-    const sortSelect = sidebarForm.querySelector(".sort-select");
+    var sortSelect = sidebarForm.querySelector(".sort-select");
     if (sortSelect) {
       sortSelect.addEventListener("change", function() { sidebarForm.submit(); });
     }
@@ -487,8 +487,13 @@ document.addEventListener("DOMContentLoaded", function() {
       var maxInput = document.querySelector("input[name='max_price']");
       if (minInput) minInput.value = this.dataset.min;
       if (maxInput) maxInput.value = this.dataset.max;
-      if (sidebarForm) setTimeout(function() { sidebarForm.submit(); }, 200);
+      var form = document.getElementById("sidebar-filter-form");
+      if (form) setTimeout(function() { form.submit(); }, 150);
     });
   });
-});
+}
+
+// Works with both Turbo and regular page loads
+document.addEventListener("turbo:load", initFilters);
+document.addEventListener("DOMContentLoaded", initFilters);
 </script>
