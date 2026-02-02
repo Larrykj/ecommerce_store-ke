@@ -1,6 +1,6 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: [ :show, :edit, :update, :destroy ]
-  after_action :track_view, only: [:show]
+  after_action :track_view, only: [ :show ]
 
   # GET /products
   def index

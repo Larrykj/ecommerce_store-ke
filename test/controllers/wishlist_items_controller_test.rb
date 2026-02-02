@@ -24,7 +24,7 @@ class WishlistItemsControllerTest < ActionDispatch::IntegrationTest
 
   test "should destroy wishlist_item" do
     wishlist_item = WishlistItem.create!(user: @user, product: @product)
-    
+
     assert_difference("WishlistItem.count", -1) do
       delete wishlist_item_url(wishlist_item)
     end

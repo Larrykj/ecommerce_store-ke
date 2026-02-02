@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
   devise_for :users
   root "products#index"
-  
-  resources :wishlist_items, only: [:index, :create, :destroy]
+
+  resources :wishlist_items, only: [ :index, :create, :destroy ]
 
   resources :products do
     resources :reviews, only: [ :create, :edit, :update, :destroy ] do
