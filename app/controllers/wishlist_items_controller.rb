@@ -7,6 +7,7 @@ class WishlistItemsController < ApplicationController
 
   def create
     @product = Product.find(params[:product_id])
+
     unless current_user.wishlist_products.include?(@product)
       current_user.wishlist_products << @product
       flash[:notice] = "Product added to wishlist!"

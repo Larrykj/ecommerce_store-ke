@@ -16,6 +16,7 @@ class User < ApplicationRecord
   def recommended_products(limit = 4)
     recent_views = product_views.order(created_at: :desc).limit(10).includes(:product)
     recent_category_ids = recent_views.map { |pv| pv.product.category_id }.uniq.compact
+
     if recent_category_ids.any?
       # Recommend products from same categories, excluding ones recently viewed if desired,
       # but for now simple category match is good.
