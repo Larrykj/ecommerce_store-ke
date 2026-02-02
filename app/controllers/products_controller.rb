@@ -1,6 +1,6 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: [ :show, :edit, :update, :destroy ]
-
+  after_action :track_view, only: [ :show ]
   # GET /products
   def index
     @categories = Category.all
@@ -8,6 +8,14 @@ class ProductsController < ApplicationController
     @products = Product.advanced_search(search_params)
     @active_filters_count = count_active_filters
     @search_params = search_params
+
+    if current_user
+      @recommended_products = current_user.recommended_products
+      @wishlist_map = current_user.wishlist_items.index_by(&:product_id)
+    else
+      @recommended_products = []
+      @wishlist_map = {}
+    end
   end
 
   # GET /products/:id
@@ -50,6 +58,14 @@ class ProductsController < ApplicationController
   end
 
   private
+
+  def track_view
+    if current_user
+      ProductView.create(user: current_user, product: @product)
+    end
+  rescue => e
+    Rails.logger.error("Failed to track view: #{e.message}")
+  end
 
   def set_product
     @product = Product.find(params[:id])

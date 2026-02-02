@@ -49,7 +49,7 @@
         </div>
         
         <div class="form-actions">
-          <%= f.submit "Update Review", class: "btn-submit" %>
+          <%= f.submit "Update Review", class: "btn-submit", data: { turbo_submits_with: "Updating..." } %>
           <%= link_to product_path(@product), class: "btn-cancel" do %>
             Cancel
           <% end %>

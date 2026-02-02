@@ -2,6 +2,8 @@ Rails.application.routes.draw do
   devise_for :users
   root "products#index"
 
+  resources :wishlist_items, only: [ :index, :create, :destroy ]
+
   resources :products do
     resources :reviews, only: [ :create, :edit, :update, :destroy ] do
       member do
@@ -9,7 +11,8 @@ Rails.application.routes.draw do
       end
     end
   end
-resources :categories
+
+  resources :categories
 
   resource :cart, only: [ :show ]
   resources :cart_items, only: [ :create, :update, :destroy ]
