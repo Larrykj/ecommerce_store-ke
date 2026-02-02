@@ -20,3 +20,4 @@ Rails.application.routes.draw do
   resources :orders, only: [ :index, :show, :new, :create ]
   get "/server_time", to: "server_time#show"
 end
+# EOF
