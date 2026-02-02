@@ -24,6 +24,23 @@
   </div>
 
   <div class="container-fluid products-container">
+    <% if current_user && current_user.product_views.count > 5 %>
+      <div class="alert alert-primary text-center mb-5 rounded-4 border-0 shadow-sm" role="alert" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <i class="bi bi-gift-fill me-2 fs-5"></i> Spree Special: Since you've been exploring, use code <strong>EXPLORE5</strong> for 5% off your next order!
+      </div>
+    <% end %>
+
+    <% if current_user && @recommended_products.present? %>
+      <div class="recommended-section mb-5">
+        <h3 class="mb-4 fw-bold" style="color: #1e293b;"><i class="bi bi-stars text-warning me-2"></i>Recommended for You</h3>
+        <div class="products-grid">
+           <% @recommended_products.each do |product| %>
+             <%= render partial: "product_card", locals: { product: product } %>
+           <% end %>
+        </div>
+      </div>
+    <% end %>
+
     <div class="row">
       <!-- Filter Sidebar -->
       <div class="col-lg-3 col-md-4">
@@ -182,46 +199,7 @@
         <% if @products.any? %>
           <div class="products-grid">
             <% @products.each do |product| %>
-              <div class="product-card">
-                <div class="product-image-wrap">
-                  <% if product.image.attached? %>
-                    <%= image_tag product.image, class: "product-image", alt: product.name %>
-                  <% else %>
-                    <div class="product-placeholder">
-                      <i class="bi bi-box-seam"></i>
-                    </div>
-                  <% end %>
-                  <span class="stock-badge badge-<%= product.stock_status_class %>">
-                    <%= product.stock_status_label %>
-                  </span>
-                  <div class="product-overlay">
-                    <%= link_to product_path(product), class: "overlay-btn" do %>
-                      <i class="bi bi-eye"></i>
-                    <% end %>
-                    <%= link_to edit_product_path(product), class: "overlay-btn" do %>
-                      <i class="bi bi-pencil"></i>
-                    <% end %>
-                  </div>
-                </div>
-                <div class="product-info">
-                  <% if product.category %>
-                    <span class="product-category"><%= product.category.name %></span>
-                  <% end %>
-                  <h3 class="product-name"><%= link_to product.name, product_path(product) %></h3>
-                  <p class="product-desc"><%= truncate(product.description, length: 80) %></p>
-                  <div class="product-footer">
-                    <div class="product-price">
-                      <span class="currency">KSh</span>
-                      <span class="amount"><%= number_with_delimiter(product.price.to_i) %></span>
-                    </div>
-                    <% if product.in_stock? %>
-                      <%= button_to cart_items_path(product_id: product.id), method: :post, class: "add-cart-btn" do %>
-                        <i class="bi bi-cart-plus"></i>
-                      <% end %>
-                    <% end %>
-                  </div>
-                </div>
-              </div>
+              <%= render partial: "product_card", locals: { product: product } %>
             <% end %>
           </div>
         <% else %>

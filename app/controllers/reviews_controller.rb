@@ -11,7 +11,6 @@ class ReviewsController < ApplicationController
     respond_to do |format|
       if @review.save
         format.html { redirect_to @product, notice: "Your review has been submitted successfully!" }
-        format.turbo_stream { flash.now[:notice] = "Your review has been submitted successfully!" }
       else
         format.html { redirect_to @product, alert: @review.errors.full_messages.join(", ") }
         format.turbo_stream { flash.now[:alert] = @review.errors.full_messages.join(", ") }
@@ -26,10 +25,8 @@ class ReviewsController < ApplicationController
     respond_to do |format|
       if @review.update(review_params)
         format.html { redirect_to @product, notice: "Your review has been updated successfully!" }
-        format.turbo_stream { flash.now[:notice] = "Your review has been updated successfully!" }
       else
         format.html { render :edit, status: :unprocessable_entity }
-        format.turbo_stream { flash.now[:alert] = @review.errors.full_messages.join(", ") }
       end
     end
   end
