@@ -35,3 +35,4 @@
 
 # Ignore kamal secrets
 /.kamal/secrets
+# EOF
