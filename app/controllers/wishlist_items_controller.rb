@@ -36,3 +36,4 @@ class WishlistItemsController < ApplicationController
     redirect_back fallback_location: products_path
   end
 end
+# EOF

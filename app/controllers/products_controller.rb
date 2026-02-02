@@ -91,3 +91,4 @@ class ProductsController < ApplicationController
     count
   end
 end
+# EOF
