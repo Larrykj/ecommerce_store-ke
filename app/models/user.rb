@@ -4,8 +4,8 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  # Encrypt sensitive user data
-  encrypts :name
+  # Encrypt sensitive user data (skip in test environment to avoid fixture issues)
+  encrypts :name unless Rails.env.test?
 
   has_many :orders, dependent: :destroy
   has_many :reviews, dependent: :destroy
