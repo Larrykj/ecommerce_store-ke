@@ -12,12 +12,7 @@ class ApplicationController < ActionController::Base
   helper_method :current_currency, :format_price
 
 
-
-
-
   private
-
-
 
   def initialize_cart
     @cart = Cart.find_by(id: session[:cart_id])
@@ -28,20 +23,14 @@ class ApplicationController < ActionController::Base
     end
   end
 
-
-
   def set_locale
     I18n.locale = params[:locale] || session[:locale] || I18n.default_locale
     session[:locale] = I18n.locale unless I18n.locale == I18n.default_locale
   end
 
-
-
   def default_url_options
     I18n.locale != I18n.default_locale ? { locale: I18n.locale } : {}
   end
-
-
 
   def set_currency
     if params[:currency]
@@ -49,13 +38,9 @@ class ApplicationController < ActionController::Base
     end
   end
 
-
-
   def current_currency
     session[:currency] || "KES"
   end
-
-
 
   # Expanded conversion with real-time rates via ExchangeRateService
   def format_price(price_in_kes)
@@ -91,11 +76,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
-
-
   protected
-
-
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [ :name ])
