@@ -6,6 +6,13 @@ sw:
   order_cancelled_message: "Oda hii imeghairiwa."
   shipping_details: "Maelezo ya Usafirishaji"
   shipping_address: "Anwani ya Kusafirisha"
+  tracking_number: "Nambari ya Ufuatiliaji"
+  shipping_carrier: "Mtoa Huduma wa Usafirishaji"
+  track_package: "Fuatilia Kifurushi"
+  need_help: "Unahitaji Msaada?"
+  support_message: "Ikiwa una maswali yoyote kuhusu oda yako, tafadhali wasiliana na timu yetu ya usaidizi."
+  contact_support: "Wasiliana na Usaidizi"
+
 
   home: "Nyumbani"
   products: "Bidhaa"
