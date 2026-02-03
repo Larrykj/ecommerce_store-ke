@@ -6,6 +6,13 @@ en:
   order_cancelled_message: "This order has been cancelled."
   shipping_details: "Shipping Details"
   shipping_address: "Shipping Address"
+  tracking_number: "Tracking Number"
+  shipping_carrier: "Shipping Carrier"
+  track_package: "Track Package"
+  need_help: "Need Help?"
+  support_message: "If you have any questions about your order, please contact our support team."
+  contact_support: "Contact Support"
+
 
   home: "Home"
   products: "Products"
