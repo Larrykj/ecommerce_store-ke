@@ -11,23 +11,23 @@
       <%= product.stock_status_label %>
     </span>
     <div class="product-overlay">
-      <%= link_to product_path(product), class: "overlay-btn", title: "View" do %>
+      <%= link_to product_path(product), class: "overlay-btn", title: t("view_details") do %>
         <i class="bi bi-eye"></i>
       <% end %>
       
       <% if current_user && defined?(@wishlist_map) %>
         <% if wishlist_item = @wishlist_map[product.id] %>
-            <%= button_to wishlist_item_path(wishlist_item), method: :delete, class: "overlay-btn", style: "color: #ef4444;", title: "Remove from Wishlist" do %>
+            <%= button_to wishlist_item_path(wishlist_item), method: :delete, class: "overlay-btn", style: "color: #ef4444;", title: t("remove_from_wishlist") do %>
                 <i class="bi bi-heart-fill"></i>
             <% end %>
         <% else %>
-            <%= button_to wishlist_items_path(product_id: product.id), method: :post, class: "overlay-btn", title: "Add to Wishlist" do %>
+            <%= button_to wishlist_items_path(product_id: product.id), method: :post, class: "overlay-btn", title: t("add_to_wishlist") do %>
                 <i class="bi bi-heart"></i>
             <% end %>
         <% end %>
       <% end %>
 
-      <%= link_to edit_product_path(product), class: "overlay-btn", title: "Edit" do %>
+      <%= link_to edit_product_path(product), class: "overlay-btn", title: t("edit") do %>
         <i class="bi bi-pencil"></i>
       <% end %>
     </div>
@@ -40,11 +40,10 @@
     <p class="product-desc"><%= truncate(product.description, length: 80) %></p>
     <div class="product-footer">
       <div class="product-price">
-        <span class="currency">KSh</span>
-        <span class="amount"><%= number_with_delimiter(product.price.to_i) %></span>
+        <span class="amount"><%= format_price(product.price.to_i) %></span>
       </div>
       <% if product.in_stock? %>
-        <%= button_to cart_items_path(product_id: product.id), method: :post, class: "add-cart-btn", title: "Add to Cart" do %>
+        <%= button_to cart_items_path(product_id: product.id), method: :post, class: "add-cart-btn", title: t("add_to_cart") do %>
           <i class="bi bi-cart-plus"></i>
         <% end %>
       <% end %>

@@ -10,27 +10,27 @@ class CartItemsController < ApplicationController
       # If product already in cart, increase quantity
       @cart_item.quantity += 1
       @cart_item.save
-      redirect_to cart_path, notice: "Product quantity updated in cart."
+      redirect_to cart_path, notice: t('cart_quantity_updated')
     else
       # Add new product to cart
       @cart_item = @cart.cart_items.create(product: product, quantity: 1)
-      redirect_to cart_path, notice: "Product added to cart successfully."
+      redirect_to cart_path, notice: t('cart_product_added')
     end
   end
 
   # PATCH/PUT /cart_items/:id
   def update
     if @cart_item.update(quantity: params[:quantity])
-      redirect_to cart_path, notice: "Quantity updated."
+      redirect_to cart_path, notice: t('quantity_updated')
     else
-      redirect_to cart_path, alert: "Could not update quantity."
+      redirect_to cart_path, alert: t('quantity_update_failed')
     end
   end
 
   # DELETE /cart_items/:id
   def destroy
     @cart_item.destroy
-    redirect_to cart_path, notice: "Product removed from cart."
+    redirect_to cart_path, notice: t('product_removed_from_cart')
   end
 
   private

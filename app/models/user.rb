@@ -4,6 +4,9 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  # Encrypt sensitive user data
+  encrypts :name
+
   has_many :orders, dependent: :destroy
   has_many :reviews, dependent: :destroy
   has_many :product_views, dependent: :destroy

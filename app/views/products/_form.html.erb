@@ -1,7 +1,7 @@
 <%= form_with(model: product, local: true) do |form| %>
   <% if product.errors.any? %>
     <div class="alert alert-danger">
-      <h4><%= pluralize(product.errors.count, "error") %> prohibited this product from being saved:</h4>
+      <h4><%= t('error_prohibited_save', count: product.errors.count, resource: t('product')) %>:</h4>
       <ul>
         <% product.errors.full_messages.each do |message| %>
           <li><%= message %></li>
@@ -11,39 +11,39 @@
   <% end %>
 
   <div class="mb-3">
-    <%= form.label :name, class: 'form-label' %>
-    <%= form.text_field :name, class: 'form-control', placeholder: 'Enter product name' %>
+    <%= form.label :name, t('name'), class: 'form-label' %>
+    <%= form.text_field :name, class: 'form-control', placeholder: t('enter_product_name') %>
   </div>
 
   <div class="mb-3">
-    <%= form.label :description, class: 'form-label' %>
-    <%= form.text_area :description, class: 'form-control', rows: 5, placeholder: 'Enter product description' %>
+    <%= form.label :description, t('description'), class: 'form-label' %>
+    <%= form.text_area :description, class: 'form-control', rows: 5, placeholder: t('enter_product_description') %>
   </div>
 
   <div class="mb-3">
-    <%= form.label :price, class: 'form-label' %>
+    <%= form.label :price, t('price'), class: 'form-label' %>
     <%= form.number_field :price, class: 'form-control', step: 0.01, placeholder: '0.00' %>
   </div>
 
   <div class="mb-3">
-    <%= form.label :quantity, class: 'form-label' %>
+    <%= form.label :quantity, t('quantity'), class: 'form-label' %>
     <%= form.number_field :quantity, class: 'form-control', placeholder: '0' %>
   </div>
 
   <div class="mb-3">
-    <%= form.label :image, "Product Image", class: 'form-label' %>
+    <%= form.label :image, t('product_image'), class: 'form-label' %>
     <%= form.file_field :image, class: 'form-control', accept: 'image/png,image/jpg,image/jpeg,image/gif' %>
     
     <% if product.image.attached? %>
       <div class="mt-2">
-        <p class="text-muted">Current image:</p>
+        <p class="text-muted"><%= t('current_image') %></p>
         <%= image_tag product.image, width: 200, class: 'img-thumbnail' %>
       </div>
     <% end %>
   </div>
 
   <div class="actions">
-    <%= form.submit class: 'btn btn-success' %>
-    <%= link_to 'Cancel', products_path, class: 'btn btn-secondary' %>
+    <%= form.submit t('save_product'), class: 'btn btn-success' %>
+    <%= link_to t('cancel'), products_path, class: 'btn btn-secondary' %>
   </div>
 <% end %>

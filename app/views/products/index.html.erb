@@ -2,8 +2,8 @@
   <!-- Hero Search Section -->
   <div class="search-hero">
     <div class="search-hero-content">
-      <h1 class="search-title">Discover Amazing Products</h1>
-      <p class="search-subtitle">Find exactly what you're looking for</p>
+      <h1 class="search-title"><%= t("discover_products") %></h1>
+      <p class="search-subtitle"><%= t("find_what_looking_for") %></p>
 
       <%= form_with url: products_path, method: :get, local: true, class: "hero-search-form" do |f| %>
         <div class="hero-search-wrapper">
@@ -11,9 +11,9 @@
           <%= f.text_field :search,
               value: params[:search],
               class: "hero-search-input",
-              placeholder: "Search products by name or description...",
+              placeholder: t("search_placeholder"),
               autocomplete: "off" %>
-          <%= f.submit "Search", class: "hero-search-btn" %>
+          <%= f.submit t("search_btn"), class: "hero-search-btn" %>
         </div>
         <!-- Preserve filters -->
         <%= hidden_field_tag :category_id, params[:category_id] if params[:category_id].present? %>
@@ -26,13 +26,13 @@
   <div class="container-fluid products-container">
     <% if current_user && current_user.product_views.count > 5 %>
       <div class="alert alert-primary text-center mb-5 rounded-4 border-0 shadow-sm" role="alert" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-        <i class="bi bi-gift-fill me-2 fs-5"></i> Spree Special: Since you've been exploring, use code <strong>EXPLORE5</strong> for 5% off your next order!
+        <i class="bi bi-gift-fill me-2 fs-5"></i> <%= t('spree_special_html') %>
       </div>
     <% end %>
 
     <% if current_user && @recommended_products.present? %>
       <div class="recommended-section mb-5">
-        <h3 class="mb-4 fw-bold" style="color: #1e293b;"><i class="bi bi-stars text-warning me-2"></i>Recommended for You</h3>
+        <h3 class="mb-4 fw-bold" style="color: #1e293b;"><i class="bi bi-stars text-warning me-2"></i><%= t("recommended_for_you") %></h3>
         <div class="products-grid">
            <% @recommended_products.each do |product| %>
              <%= render partial: "product_card", locals: { product: product } %>
@@ -46,7 +46,7 @@
       <div class="col-lg-3 col-md-4">
         <div class="filter-sidebar">
           <div class="filter-header">
-            <h5><i class="bi bi-sliders me-2"></i>Filters</h5>
+            <h5><i class="bi bi-sliders me-2"></i><%= t("filters") %></h5>
             <% if @active_filters_count.to_i > 0 %>
               <span class="filter-badge"><%= @active_filters_count %></span>
             <% end %>
@@ -57,11 +57,11 @@
 
             <!-- Category Filter -->
             <div class="filter-group">
-              <h6 class="filter-title"><i class="bi bi-grid me-2"></i>Category</h6>
+              <h6 class="filter-title"><i class="bi bi-grid me-2"></i><%= t("categories") %></h6>
               <div class="filter-options">
                 <label class="filter-option <%= 'active' unless params[:category_id].present? %>">
                   <%= f.radio_button :category_id, "", checked: !params[:category_id].present?, class: "filter-radio" %>
-                  <span>All Categories</span>
+                  <span><%= t("all_categories") %></span>
                   <span class="option-count"><%= Product.count %></span>
                 </label>
                 <% @categories.each do |category| %>
@@ -76,48 +76,49 @@
 
             <!-- Price Range -->
             <div class="filter-group">
-              <h6 class="filter-title"><i class="bi bi-currency-dollar me-2"></i>Price Range</h6>
+              <h6 class="filter-title"><i class="bi bi-currency-dollar me-2"></i><%= t("price_range") %></h6>
               <div class="price-inputs">
-                <%= f.number_field :min_price, value: params[:min_price], class: "price-input", placeholder: "Min", min: 0 %>
-                <span class="price-sep">to</span>
-                <%= f.number_field :max_price, value: params[:max_price], class: "price-input", placeholder: "Max", min: 0 %>
+                <%= f.number_field :min_price, value: params[:min_price], class: "price-input", placeholder: t('min_price_placeholder'), min: 0 %>
+                <span class="price-sep"><%= t('price_separator') %></span>
+                <%= f.number_field :max_price, value: params[:max_price], class: "price-input", placeholder: t('max_price_placeholder'), min: 0 %>
               </div>
               <div class="price-presets">
-                <button type="button" class="preset-btn" data-min="0" data-max="1000">Under 1K</button>
-                <button type="button" class="preset-btn" data-min="1000" data-max="5000">1K-5K</button>
-                <button type="button" class="preset-btn" data-min="5000" data-max="">5K+</button>
+                <button type="button" class="preset-btn" data-min="0" data-max="1000"><%= t('price_presets.under_1k') %></button>
+                <button type="button" class="preset-btn" data-min="1000" data-max="5000"><%= t('price_presets.1k_to_5k') %></button>
+                <button type="button" class="preset-btn" data-min="5000" data-max=""><%= t('price_presets.5k_plus') %></button>
               </div>
             </div>
 
             <!-- Stock Status -->
             <div class="filter-group">
-              <h6 class="filter-title"><i class="bi bi-box me-2"></i>Availability</h6>
+              <h6 class="filter-title"><i class="bi bi-box me-2"></i><%= t("availability") %></h6>
               <div class="filter-options">
                 <label class="filter-option <%= 'active' unless params[:stock_status].present? %>">
                   <%= f.radio_button :stock_status, "", checked: !params[:stock_status].present?, class: "filter-radio" %>
-                  <span>All Items</span>
+                  <span><%= t('all_items') %></span>
                 </label>
                 <label class="filter-option <%= 'active' if params[:stock_status] == 'in_stock' %>">
                   <%= f.radio_button :stock_status, "in_stock", checked: params[:stock_status] == "in_stock", class: "filter-radio" %>
-                  <span><i class="bi bi-check-circle text-success me-1"></i>In Stock</span>
+                  <span><i class="bi bi-check-circle text-success me-1"></i><%= t("in_stock") %></span>
                 </label>
                 <label class="filter-option <%= 'active' if params[:stock_status] == 'out_of_stock' %>">
                   <%= f.radio_button :stock_status, "out_of_stock", checked: params[:stock_status] == "out_of_stock", class: "filter-radio" %>
-                  <span><i class="bi bi-x-circle text-danger me-1"></i>Out of Stock</span>
+                  <span><i class="bi bi-x-circle text-danger me-1"></i><%= t("out_of_stock") %></span>
                 </label>
               </div>
             </div>
 
             <!-- Sort By -->
             <div class="filter-group">
-              <h6 class="filter-title"><i class="bi bi-sort-down me-2"></i>Sort By</h6>
+              <h6 class="filter-title"><i class="bi bi-sort-down me-2"></i><%= t("sort_by") %></h6>
+
               <%= f.select :sort,
                   options_for_select([
-                    ["Newest First", "newest"],
-                    ["Price: Low to High", "price_asc"],
-                    ["Price: High to Low", "price_desc"],
-                    ["Name: A-Z", "name_asc"],
-                    ["Name: Z-A", "name_desc"]
+                     [t('sort_options.newest'), "newest"],
+                    [t('sort_options.price_asc'), "price_asc"],
+                    [t('sort_options.price_desc'), "price_desc"],
+                    [t('sort_options.name_asc'), "name_asc"],
+                    [t('sort_options.name_desc'), "name_desc"]
                   ], params[:sort] || "newest"),
                   {},
                   class: "sort-select" %>
@@ -125,10 +126,10 @@
 
             <!-- Filter Actions -->
             <div class="filter-actions">
-              <%= f.submit "Apply Filters", class: "apply-btn" %>
+              <%= f.submit t("apply_filters"), class: "apply-btn" %>
               <% if @active_filters_count.to_i > 0 %>
                 <%= link_to products_path, class: "clear-btn" do %>
-                  <i class="bi bi-x-circle me-1"></i>Clear All
+                  <i class="bi bi-x-circle me-1"></i><%= t("clear_all") %>
                 <% end %>
               <% end %>
             </div>
@@ -143,17 +144,17 @@
           <div class="results-info">
             <h2 class="results-title">
               <% if params[:search].present? %>
-                Results for "<%= params[:search] %>"
+                <%= t("results_for") %> "<%= params[:search] %>"
               <% elsif params[:category_id].present? %>
-                <%= Category.find_by(id: params[:category_id])&.name || "Products" %>
+                <%= Category.find_by(id: params[:category_id])&.name || t("products") %>
               <% else %>
-                All Products
+                <%= t("all_products") %>
               <% end %>
             </h2>
-            <p class="results-count"><%= @products.count %> product(s) found</p>
+            <p class="results-count"><%= @products.count %> <%= t("products_found") %></p>
           </div>
           <%= link_to new_product_path, class: "add-product-btn" do %>
-            <i class="bi bi-plus-lg me-2"></i>Add Product
+            <i class="bi bi-plus-lg me-2"></i><%= t("add_product") %>
           <% end %>
         </div>
 
@@ -178,7 +179,7 @@
             <% end %>
             <% if params[:min_price].present? || params[:max_price].present? %>
               <span class="filter-tag">
-                KSh <%= params[:min_price] || "0" %> - <%= params[:max_price] || "∞" %>
+                <%= t("price") %>: <%= params[:min_price] || t("price_min_default") %> - <%= params[:max_price] || t("price_max_unlimited") %>
                 <%= link_to products_path(request.query_parameters.except(:min_price, :max_price)), class: "tag-remove" do %>
                   <i class="bi bi-x"></i>
                 <% end %>
@@ -186,7 +187,7 @@
             <% end %>
             <% if params[:stock_status].present? %>
               <span class="filter-tag">
-                <%= params[:stock_status] == "in_stock" ? "In Stock" : "Out of Stock" %>
+                <%= params[:stock_status] == "in_stock" ? t("in_stock") : t("out_of_stock") %>
                 <%= link_to products_path(request.query_parameters.except(:stock_status)), class: "tag-remove" do %>
                   <i class="bi bi-x"></i>
                 <% end %>
@@ -205,10 +206,10 @@
         <% else %>
           <div class="empty-state">
             <i class="bi bi-search empty-icon"></i>
-            <h3>No products found</h3>
-            <p>Try adjusting your search or filters</p>
+            <h3><%= t("no_products_found") %></h3>
+            <p><%= t("try_adjusting_search") %></p>
             <% if @active_filters_count.to_i > 0 %>
-              <%= link_to "Clear Filters", products_path, class: "btn btn-outline-primary" %>
+              <%= link_to t("clear_filters"), products_path, class: "btn btn-outline-primary" %>
             <% end %>
           </div>
         <% end %>

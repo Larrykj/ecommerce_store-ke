@@ -7,9 +7,9 @@ class Cart < ApplicationRecord
     cart_items.sum { |item| item.product.price * item.quantity }
   end
 
-  # Format total price in KSH
-  def formatted_total
-    "KSh #{total_price.round(2)}"
+  # Count total items in cart
+  def total_items
+    cart_items.sum(:quantity)
   end
 
   # Count total items in cart

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_02_050638) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_03_143715) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -77,10 +77,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_02_050638) do
 
   create_table "orders", force: :cascade do |t|
     t.text "address"
+    t.text "address_ciphertext"
     t.datetime "created_at", null: false
     t.string "email"
+    t.text "email_ciphertext"
+    t.datetime "estimated_delivery_date"
     t.string "name"
+    t.text "name_ciphertext"
     t.string "phone"
+    t.text "phone_ciphertext"
     t.string "status"
     t.decimal "total_price"
     t.datetime "updated_at", null: false
@@ -133,6 +138,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_02_050638) do
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "name"
+    t.text "name_ciphertext"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
