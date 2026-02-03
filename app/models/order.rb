@@ -33,18 +33,17 @@ class Order < ApplicationRecord
 
   def step_status(step)
     step_index = ORDER_STEPS.index(step)
-    return 'active' if step_index == current_step_index
-    return 'completed' if step_index < current_step_index
-    'pending'
+    return "active" if step_index == current_step_index
+    return "completed" if step_index < current_step_index
+    "pending"
   end
 
   def percentage_complete
-    return 100 if status == 'delivered'
-    return 100 if status == 'cancelled'
-    
+    return 100 if status == "delivered"
+    return 100 if status == "cancelled"
+
     index = current_step_index
     total = ORDER_STEPS.size - 1
     (index.to_f / total * 100).to_i
   end
 end
-

@@ -1,5 +1,5 @@
-require 'net/http'
-require 'json'
+require "net/http"
+require "json"
 
 class ExchangeRateService
   API_URL = "https://open.er-api.com/v6/latest/KES"
@@ -17,7 +17,7 @@ class ExchangeRateService
         uri = URI(API_URL)
         response = Net::HTTP.get(uri)
         data = JSON.parse(response)
-        
+
         if data["result"] == "success"
           data["rates"]
         else

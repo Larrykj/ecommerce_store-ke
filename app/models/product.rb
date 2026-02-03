@@ -111,11 +111,11 @@ class Product < ApplicationRecord
   # Stock status label
   def stock_status_label
     if quantity.zero?
-      I18n.t('out_of_stock')
+      I18n.t("out_of_stock")
     elsif quantity <= 5
-      I18n.t('low_stock', count: quantity)
+      I18n.t("low_stock", count: quantity)
     else
-      I18n.t('in_stock_with_count', count: quantity)
+      I18n.t("in_stock_with_count", count: quantity)
     end
   end
 

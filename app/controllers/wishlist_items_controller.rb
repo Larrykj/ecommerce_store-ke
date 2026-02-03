@@ -10,9 +10,9 @@ class WishlistItemsController < ApplicationController
 
     unless current_user.wishlist_products.include?(@product)
       current_user.wishlist_products << @product
-      flash[:notice] = t('wishlist_added_success')
+      flash[:notice] = t("wishlist_added_success")
     else
-      flash[:alert] = t('wishlist_already_exists')
+      flash[:alert] = t("wishlist_already_exists")
     end
 
     redirect_back fallback_location: products_path
@@ -28,9 +28,9 @@ class WishlistItemsController < ApplicationController
 
     if @item
       @item.destroy
-      flash[:notice] = t('wishlist_removed_success')
+      flash[:notice] = t("wishlist_removed_success")
     else
-      flash[:alert] = t('wishlist_item_not_found')
+      flash[:alert] = t("wishlist_item_not_found")
     end
 
     redirect_back fallback_location: products_path

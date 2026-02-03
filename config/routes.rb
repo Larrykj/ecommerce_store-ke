@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-
   devise_for :users
 
   root "products#index"
@@ -11,17 +10,11 @@ Rails.application.routes.draw do
 
 
   resources :products do
-
     resources :reviews, only: [ :create, :edit, :update, :destroy ] do
-
       member do
-
         post :helpful
-
       end
-
     end
-
   end
 
 
@@ -39,8 +32,6 @@ Rails.application.routes.draw do
   resources :orders, only: [ :index, :show, :new, :create ]
 
   get "/server_time", to: "server_time#show"
-
 end
 
 # EOF
-
