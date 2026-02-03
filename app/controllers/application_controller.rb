@@ -64,17 +64,17 @@ class ApplicationController < ActionController::Base
     rate = ExchangeRateService.get_rate(currency)
     if rate.nil?
       rate = case currency
-             when "USD" then 0.0075
-             when "EUR" then 0.0068
-             when "GBP" then 0.0058
-             when "JPY" then 1.10
-             when "CNY" then 0.054
-             when "INR" then 0.62
-             when "CAD" then 0.010
-             when "AUD" then 0.011
-             when "ZAR" then 0.14
-             else 1
-             end
+      when "USD" then 0.0075
+      when "EUR" then 0.0068
+      when "GBP" then 0.0058
+      when "JPY" then 1.10
+      when "CNY" then 0.054
+      when "INR" then 0.62
+      when "CAD" then 0.010
+      when "AUD" then 0.011
+      when "ZAR" then 0.14
+      else 1
+      end
     end
     converted_price = price_in_kes * rate
     case currency
@@ -101,6 +101,4 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit(:sign_up, keys: [ :name ])
     devise_parameter_sanitizer.permit(:account_update, keys: [ :name ])
   end
-
 end
-
