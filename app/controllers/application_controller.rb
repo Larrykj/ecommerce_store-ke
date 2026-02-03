@@ -11,7 +11,6 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_currency, :format_price
 
-
   private
 
   def initialize_cart
