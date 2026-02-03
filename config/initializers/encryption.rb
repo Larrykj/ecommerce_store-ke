@@ -1,10 +1,22 @@
 # Additional encryption and security settings
 Rails.application.config.to_prepare do
-  # Ensure ActiveRecord encryption is enabled
-  # Keys must be set via environment variables or credentials
-  primary_key = ENV['ACTIVE_RECORD_PRIMARY_KEY'] || Rails.application.credentials.dig(:active_record_encryption, :primary_key)
-  deterministic_key = ENV['ACTIVE_RECORD_DETERMINISTIC_KEY'] || Rails.application.credentials.dig(:active_record_encryption, :deterministic_key)
-  key_derivation_salt = ENV['ACTIVE_RECORD_KEY_DERIVATION_SALT'] || Rails.application.credentials.dig(:active_record_encryption, :key_derivation_salt)
+  primary_key = ENV['ACTIVE_RECORD_PRIMARY_KEY']
+  deterministic_key = ENV['ACTIVE_RECORD_DETERMINISTIC_KEY']
+  key_derivation_salt = ENV['ACTIVE_RECORD_KEY_DERIVATION_SALT']
+
+  # Only attempt credentials if not already set via ENV
+  if Rails.env.production? || Rails.env.development?
+    primary_key ||= Rails.application.credentials.dig(:active_record_encryption, :primary_key)
+    deterministic_key ||= Rails.application.credentials.dig(:active_record_encryption, :deterministic_key)
+    key_derivation_salt ||= Rails.application.credentials.dig(:active_record_encryption, :key_derivation_salt)
+  end
+
+  # Use stub keys in test so views that reference encrypted attrs don't blow up
+  if Rails.env.test?
+    primary_key ||= "test_primary_key_0000000000000000"
+    deterministic_key ||= "test_deterministic_key_000000000"
+    key_derivation_salt ||= "test_key_derivation_salt_0000000"
+  end
 
   if primary_key && deterministic_key && key_derivation_salt
     ActiveRecord::Encryption.configure(
@@ -21,7 +33,6 @@ end
 module Devise
   module Models
     module Validatable
-      # Extend password validation for stronger passwords
       def password_required?
         !persisted? || !password.nil? || !password_confirmation.nil?
       end
