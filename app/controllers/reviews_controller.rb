@@ -10,7 +10,7 @@ class ReviewsController < ApplicationController
 
     respond_to do |format|
       if @review.save
-        format.html { redirect_to @product, notice: "Your review has been submitted successfully!" }
+        format.html { redirect_to @product, notice: t("review_submitted_success") }
       else
         format.html { redirect_to @product, alert: @review.errors.full_messages.join(", ") }
         format.turbo_stream { flash.now[:alert] = @review.errors.full_messages.join(", ") }
@@ -24,7 +24,7 @@ class ReviewsController < ApplicationController
   def update
     respond_to do |format|
       if @review.update(review_params)
-        format.html { redirect_to @product, notice: "Your review has been updated successfully!" }
+        format.html { redirect_to @product, notice: t("review_updated_success") }
       else
         format.html { render :edit, status: :unprocessable_entity }
       end
@@ -34,8 +34,8 @@ class ReviewsController < ApplicationController
   def destroy
     @review.destroy
     respond_to do |format|
-      format.html { redirect_to @product, notice: "Your review has been deleted." }
-      format.turbo_stream { flash.now[:notice] = "Your review has been deleted." }
+      format.html { redirect_to @product, notice: t("review_deleted_success") }
+      format.turbo_stream { flash.now[:notice] = t("review_deleted_success") }
     end
   end
 
@@ -43,7 +43,7 @@ class ReviewsController < ApplicationController
   def helpful
     @review.mark_helpful!
     respond_to do |format|
-      format.html { redirect_to @product, notice: "Thanks for your feedback!" }
+      format.html { redirect_to @product, notice: t("review_helpful_thanks") }
       format.turbo_stream
     end
   end
@@ -60,7 +60,7 @@ class ReviewsController < ApplicationController
 
   def authorize_review
     unless @review.editable_by?(current_user)
-      redirect_to @product, alert: "You are not authorized to perform this action."
+      redirect_to @product, alert: t("not_authorized")
     end
   end
 

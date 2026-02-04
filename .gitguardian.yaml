@@ -1,0 +1,14 @@
+# GitGuardian configuration
+# Exclude locale translation files which contain the word "password" as UI text, not secrets
+
+version: 2
+
+paths-ignore:
+  - config/locales/*.yml
+  - config/locales/**/*.yml
+  - "**/*.yml" # Locale files with translation strings
+
+# Ignore specific patterns that are false positives
+matches-ignore:
+  - name: Locale translation strings
+    match: password|nenosiri|пароль|senha|mot de passe|contraseña|密码

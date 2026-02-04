@@ -11,7 +11,7 @@ class OrdersController < ApplicationController
 
   def new
     if @cart.cart_items.empty?
-      redirect_to cart_path, alert: "Your cart is empty!"
+      redirect_to cart_path, alert: t("cart_empty_error")
       return
     end
 
@@ -24,6 +24,8 @@ class OrdersController < ApplicationController
   def create
     @order = current_user.orders.new(order_params)
     @order.status = "pending"
+    @order.estimated_delivery_date = 5.days.from_now
+
 
     # Calculate total from cart
     total = 0
@@ -52,7 +54,7 @@ class OrdersController < ApplicationController
       # Clear the cart
       @cart.cart_items.destroy_all
 
-      redirect_to order_path(@order), notice: "Order placed successfully!"
+      redirect_to order_path(@order), notice: t("order_placed_success")
     else
       render :new, status: :unprocessable_entity
     end

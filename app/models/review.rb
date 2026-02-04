@@ -3,10 +3,11 @@ class Review < ApplicationRecord
   belongs_to :product
 
   # Validations
-  validates :rating, presence: true, inclusion: { in: 1..5, message: "must be between 1 and 5" }
+  # Validations
+  validates :rating, presence: true, inclusion: { in: 1..5, message: ->(_object, _data) { I18n.t("errors.messages.rating_between") } }
   validates :title, length: { maximum: 100 }, allow_blank: true
   validates :content, length: { minimum: 10, maximum: 1000 }, allow_blank: false
-  validates :user_id, uniqueness: { scope: :product_id, message: "has already reviewed this product" }
+  validates :user_id, uniqueness: { scope: :product_id, message: ->(_object, _data) { I18n.t("errors.messages.already_reviewed_product") } }
 
   # Scopes
   scope :recent, -> { order(created_at: :desc) }
@@ -18,16 +19,16 @@ class Review < ApplicationRecord
   # Instance methods
   def rating_label
     case rating
-    when 5 then "Excellent"
-    when 4 then "Very Good"
-    when 3 then "Good"
-    when 2 then "Fair"
-    when 1 then "Poor"
+    when 5 then I18n.t("review.rating_labels.excellent")
+    when 4 then I18n.t("review.rating_labels.very_good")
+    when 3 then I18n.t("review.rating_labels.good")
+    when 2 then I18n.t("review.rating_labels.fair")
+    when 1 then I18n.t("review.rating_labels.poor")
     end
   end
 
   def formatted_date
-    created_at.strftime("%B %d, %Y")
+    I18n.l(created_at, format: :long)
   end
 
   def mark_helpful!

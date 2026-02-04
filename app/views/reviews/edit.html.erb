@@ -2,24 +2,24 @@
   <div class="container">
     <nav class="breadcrumb-nav">
       <%= link_to products_path, class: "breadcrumb-link" do %>
-        <i class="bi bi-house me-1"></i>Products
+        <i class="bi bi-house me-1"></i><%= t("products") %>
       <% end %>
       <i class="bi bi-chevron-right breadcrumb-sep"></i>
       <%= link_to @product.name, product_path(@product), class: "breadcrumb-link" %>
       <i class="bi bi-chevron-right breadcrumb-sep"></i>
-      <span class="breadcrumb-current">Edit Review</span>
+      <span class="breadcrumb-current"><%= t("edit_resource", resource: t("review")) %></span>
     </nav>
 
     <div class="edit-review-card">
       <div class="card-header">
-        <h1><i class="bi bi-pencil-square me-2"></i>Edit Your Review</h1>
-        <p>Update your review for <strong><%= @product.name %></strong></p>
+        <h1><i class="bi bi-pencil-square me-2"></i><%= t("edit_your_review") %></h1>
+        <p><%= t("update_review_for_html", product: "<strong>#{@product.name}</strong>") %></p>
       </div>
 
       <%= form_with model: [@product, @review], local: true, class: "review-form" do |f| %>
         <% if @review.errors.any? %>
           <div class="error-box">
-            <h4><%= pluralize(@review.errors.count, "error") %> prevented your review from being saved:</h4>
+            <h4><%= pluralize(@review.errors.count, "error") %> <%= t("prevented_review_save") %>:</h4>
             <ul>
               <% @review.errors.full_messages.each do |message| %>
                 <li><%= message %></li>
@@ -29,7 +29,7 @@
         <% end %>
 
         <div class="form-group">
-          <label class="form-label">Your Rating</label>
+          <label class="form-label"><%= t("your_rating") %></label>
           <div class="star-rating-input">
             <% 5.downto(1) do |i| %>
               <%= f.radio_button :rating, i, id: "rating-#{i}", class: "star-input", checked: @review.rating == i %>
@@ -39,19 +39,19 @@
         </div>
         
         <div class="form-group">
-          <label class="form-label">Review Title (Optional)</label>
-          <%= f.text_field :title, class: "form-control", placeholder: "Summarize your experience" %>
+          <label class="form-label"><%= t("review_title_optional") %></label>
+          <%= f.text_field :title, class: "form-control", placeholder: t("summarize_experience") %>
         </div>
         
         <div class="form-group">
-          <label class="form-label">Your Review</label>
-          <%= f.text_area :content, class: "form-control", rows: 5, placeholder: "Share your experience with this product (minimum 10 characters)" %>
+          <label class="form-label"><%= t("your_review") %></label>
+          <%= f.text_area :content, class: "form-control", rows: 5, placeholder: t("share_experience_placeholder") %>
         </div>
         
         <div class="form-actions">
-          <%= f.submit "Update Review", class: "btn-submit", data: { turbo_submits_with: "Updating..." } %>
+          <%= f.submit t("update_review"), class: "btn-submit", data: { turbo_submits_with: t("updating") } %>
           <%= link_to product_path(@product), class: "btn-cancel" do %>
-            Cancel
+            <%= t("cancel") %>
           <% end %>
         </div>
       <% end %>
