@@ -23,8 +23,8 @@ class ApplicationController < ActionController::Base
   end
 
   def set_locale
-    I18n.locale = params[:locale] || session[:locale] || I18n.default_locale
-    session[:locale] = I18n.locale unless I18n.locale == I18n.default_locale
+    # Forces English unless explicitly requested via URL (fixes stuck session issue)
+    I18n.locale = params[:locale] || I18n.default_locale
   end
 
   def default_url_options

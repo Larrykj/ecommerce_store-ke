@@ -33,7 +33,7 @@
       <!-- Product Info -->
       <div class="product-info-section">
         <% if @product.category %>
-          <span class="product-category"><%= @product.category.name %></span>
+          <span class="product-category"><%= t("categories_data.#{@product.category.name.parameterize.underscore}", default: @product.category.name) %></span>
         <% end %>
 
         <h1 class="product-title"><%= @product.name %></h1>
@@ -61,7 +61,7 @@
 
         <div class="product-description">
           <h4><i class="bi bi-info-circle me-2"></i><%= t("description") %></h4>
-          <p><%= @product.description %></p>
+          <p><%= t("product_descriptions.#{@product.name.parameterize.underscore}", default: @product.description) %></p>
         </div>
 
         <div class="product-meta">

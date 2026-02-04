@@ -67,7 +67,7 @@
                 <% @categories.each do |category| %>
                   <label class="filter-option <%= 'active' if params[:category_id] == category.id.to_s %>">
                     <%= f.radio_button :category_id, category.id, checked: params[:category_id] == category.id.to_s, class: "filter-radio" %>
-                    <span><%= category.name %></span>
+                    <span><%= t("categories_data.#{category.name.parameterize.underscore}", default: category.name) %></span>
                     <span class="option-count"><%= category.products.count %></span>
                   </label>
                 <% end %>
@@ -146,7 +146,8 @@
               <% if params[:search].present? %>
                 <%= t("results_for") %> "<%= params[:search] %>"
               <% elsif params[:category_id].present? %>
-                <%= Category.find_by(id: params[:category_id])&.name || t("products") %>
+                <% category = Category.find_by(id: params[:category_id]) %>
+                <%= category ? t("categories_data.#{category.name.parameterize.underscore}", default: category.name) : t("products") %>
               <% else %>
                 <%= t("all_products") %>
               <% end %>

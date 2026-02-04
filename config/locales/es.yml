@@ -243,3 +243,9 @@ es:
       user:
         not_found_in_database: "Correo electrónico o contraseña inválidos."
       unauthenticated: "Necesitas iniciar sesión o registrarte antes de continuar."
+  categories_data:
+    electronics: "Electrónica"
+    fashion: "Moda"
+    home_living: "Hogar y Vida"
+    groceries: "Comestibles"
+    beauty_personal_care: "Belleza y Cuidado Personal"

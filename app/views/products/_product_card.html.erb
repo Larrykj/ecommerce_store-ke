@@ -34,10 +34,10 @@
   </div>
   <div class="product-info">
     <% if product.category %>
-      <span class="product-category"><%= product.category.name %></span>
+      <span class="product-category"><%= t("categories_data.#{product.category.name.parameterize.underscore}", default: product.category.name) %></span>
     <% end %>
     <h3 class="product-name"><%= link_to product.name, product_path(product) %></h3>
-    <p class="product-desc"><%= truncate(product.description, length: 80) %></p>
+    <p class="product-desc"><%= truncate(t("product_descriptions.#{product.name.parameterize.underscore}", default: product.description), length: 80) %></p>
     <div class="product-footer">
       <div class="product-price">
         <span class="amount"><%= format_price(product.price.to_i) %></span>
