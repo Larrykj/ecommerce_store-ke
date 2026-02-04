@@ -15,8 +15,11 @@ class ExchangeRateService
     Rails.cache.fetch("exchange_rates_kes", expires_in: 24.hours) do
       begin
         uri = URI(API_URL)
-        response = Net::HTTP.get(uri)
-        data = JSON.parse(response)
+        response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https', open_timeout: 2, read_timeout: 2) do |http|
+          request = Net::HTTP::Get.new(uri)
+          http.request(request)
+        end
+        data = JSON.parse(response.body)
 
         if data["result"] == "success"
           data["rates"]
